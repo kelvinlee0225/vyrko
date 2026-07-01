@@ -1,0 +1,340 @@
+@startuml erd_taller_automotriz_v4
+!theme plain
+skinparam backgroundColor transparent
+skinparam linetype ortho
+skinparam ranksep 60
+skinparam nodesep 40
+
+skinparam entity {
+  BackgroundColor #2C2C2A
+  BorderColor #888780
+  FontColor #E8E6DD
+  FontName Arial
+  FontSize 12
+  AttributeFontColor #E8E6DD
+  AttributeFontSize 11
+  AttributeFontName Arial
+}
+
+skinparam arrow {
+  Color #9c9a92
+  FontColor #9c9a92
+  FontSize 10
+  FontName Arial
+}
+
+' ─────────────────────────────────────────
+' ENTIDADES
+' ─────────────────────────────────────────
+
+entity CLIENTE {
+  * id : uuid <<PK>>
+  --
+  * nombre_razon_social : varchar
+  * tipo_cliente : varchar
+  cedula_rnc : varchar
+  * telefono : varchar
+  correo : varchar
+  direccion : varchar
+  limite_credito : decimal
+  dias_credito : int
+}
+
+entity VEHICULO {
+  * id : uuid <<PK>>
+  --
+  * cliente_id : uuid <<FK>>
+  * placa : varchar
+  * marca : varchar
+  * modelo : varchar
+  * anio : int
+  * color : varchar
+  vin_chasis : varchar
+}
+
+entity TECNICO {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar
+  * activo : boolean
+}
+
+' ── Servicios e Inventario ───────────────
+
+entity SERVICIO {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar
+  * tipo_trabajo : varchar
+  * parte_vehiculo : varchar
+  * precio_base : decimal
+  * lleva_itbis : boolean
+}
+
+entity MATERIAL {
+  * id : uuid <<PK>>
+  --
+  * categoria_id : uuid <<FK>>
+  * codigo : varchar
+  * nombre : varchar
+  * precio_costo : decimal
+  * stock_actual : decimal
+  * stock_minimo : int
+}
+
+entity CATEGORIA_MATERIAL {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar
+}
+
+entity PROVEEDOR {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar
+  rnc_cedula : varchar
+  telefono : varchar
+  correo : varchar
+  direccion : varchar
+  contacto : varchar
+  * emite_comprobante : boolean
+}
+
+entity MOVIMIENTO_INVENTARIO {
+  * id : uuid <<PK>>
+  --
+  * material_id : uuid <<FK>>
+  proveedor_id : uuid <<FK>>
+  * usuario_id : uuid <<FK>>
+  * tipo_movimiento : varchar
+  * cantidad : decimal
+  motivo : varchar
+  * created_at : timestamp
+}
+
+' ── Cotizaciones ─────────────────────────
+
+entity COTIZACION {
+  * id : uuid <<PK>>
+  --
+  * cliente_id : uuid <<FK>>
+  * vehiculo_id : uuid <<FK>>
+  * numero : varchar
+  * estado : varchar
+  * fecha_validez : date
+  descuento_global : decimal
+  notas : text
+}
+
+entity COTIZACION_LINEA {
+  * id : uuid <<PK>>
+  --
+  * cotizacion_id : uuid <<FK>>
+  * servicio_id : uuid <<FK>>
+  * descripcion : varchar
+  * cantidad : decimal
+  * precio_unitario : decimal
+  * itbis : decimal
+  descuento : decimal
+}
+
+' ── Órdenes de Trabajo ───────────────────
+
+entity ORDEN_TRABAJO {
+  * id : uuid <<PK>>
+  --
+  cotizacion_id : uuid <<FK>>
+  * vehiculo_id : uuid <<FK>>
+  * tecnico_id : uuid <<FK>>
+  * estado : varchar
+  * fecha_entrada : date
+  fecha_entrega_estimada : date
+  fecha_entrega_real : date
+  descripcion_trabajo : text
+}
+
+entity ORDEN_TRABAJO_CONSUMO {
+  * id : uuid <<PK>>
+  --
+  * orden_trabajo_id : uuid <<FK>>
+  * material_id : uuid <<FK>>
+  * cantidad_real : decimal
+}
+
+' ── Seguros ──────────────────────────────
+
+entity RECLAMO_SEGURO {
+  * id : uuid <<PK>>
+  --
+  * orden_trabajo_id : uuid <<FK>>
+  * aseguradora_cliente_id : uuid <<FK>>
+  * numero_reclamo : varchar
+  numero_poliza : varchar
+  * monto_cubierto : decimal
+}
+
+' ── Facturación ──────────────────────────
+
+entity FACTURA {
+  * id : uuid <<PK>>
+  --
+  * cliente_id : uuid <<FK>>
+  * orden_trabajo_id : uuid <<FK>>
+  * tipo_pagador : varchar
+  * tipo_ncf : varchar
+  * subtotal : decimal
+  * itbis_total : decimal
+  * total : decimal
+  * estado : varchar
+  * created_at : timestamp
+}
+
+entity FACTURA_LINEA {
+  * id : uuid <<PK>>
+  --
+  * factura_id : uuid <<FK>>
+  * servicio_id : uuid <<FK>>
+  * descripcion : varchar
+  * cantidad : decimal
+  * precio_unitario : decimal
+  * itbis : decimal
+}
+
+' ── e-NCF ────────────────────────────────
+
+entity COMPROBANTE_FISCAL {
+  * id : uuid <<PK>>
+  --
+  * factura_id : uuid <<FK>>
+  * secuencia_id : uuid <<FK>>
+  * ncf : varchar
+  * estado_dgii : varchar
+  xml_firmado : text
+  numero_autorizacion : varchar
+  fecha_aprobacion : timestamp
+}
+
+entity SECUENCIA_NCF {
+  * id : uuid <<PK>>
+  --
+  * tipo_comprobante : varchar
+  * rango_inicio : int
+  * rango_fin : int
+  * siguiente : int
+}
+
+' ── Devoluciones ─────────────────────────
+
+entity DEVOLUCION {
+  * id : uuid <<PK>>
+  --
+  * factura_id : uuid <<FK>>
+  * motivo : text
+  * estado_aprobacion : varchar
+  aprobado_por : uuid <<FK>>
+  * created_at : timestamp
+}
+
+entity NOTA_CREDITO {
+  * id : uuid <<PK>>
+  --
+  * devolucion_id : uuid <<FK>>
+  * ncf_b04 : varchar
+  * monto : decimal
+  * created_at : timestamp
+}
+
+' ── Cobros ───────────────────────────────
+
+entity PAGO {
+  * id : uuid <<PK>>
+  --
+  * factura_id : uuid <<FK>>
+  * monto : decimal
+  * forma_pago : varchar
+  * fecha_pago : date
+  referencia : varchar
+}
+
+entity RECIBO_INGRESO {
+  * id : uuid <<PK>>
+  --
+  * pago_id : uuid <<FK>>
+  * numero : varchar
+  * created_at : timestamp
+}
+
+' ── Auth ─────────────────────────────────
+
+entity USUARIO {
+  * id : uuid <<PK>>
+  --
+  * rol_id : uuid <<FK>>
+  * nombre : varchar
+  * username : varchar
+  password_hash : varchar
+  activo : boolean
+}
+
+entity ROL {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar
+}
+
+' ── Empresa (configuracion, fila unica) ──
+
+entity EMPRESA {
+  * id : uuid <<PK>>
+  --
+  * nombre : varchar
+  * rnc : varchar
+  * direccion : varchar
+  * telefono : varchar
+  * correo : varchar
+}
+
+' ─────────────────────────────────────────
+' RELACIONES
+' ─────────────────────────────────────────
+
+CLIENTE                ||--o{ VEHICULO               : "posee"
+CLIENTE                ||--o{ COTIZACION             : "solicita"
+CLIENTE                ||--o{ FACTURA                : "recibe"
+CLIENTE                ||--o{ RECLAMO_SEGURO         : "asegura (como aseguradora)"
+
+VEHICULO               ||--o{ ORDEN_TRABAJO          : "ingresa en"
+
+TECNICO                ||--o{ ORDEN_TRABAJO          : "asignado a"
+
+COTIZACION             ||--|{ COTIZACION_LINEA       : "contiene"
+COTIZACION             ||--o| ORDEN_TRABAJO          : "se convierte en"
+
+SERVICIO               ||--o{ COTIZACION_LINEA       : "referenciado en"
+SERVICIO               ||--o{ FACTURA_LINEA          : "referenciado en"
+
+ORDEN_TRABAJO          ||--|{ ORDEN_TRABAJO_CONSUMO  : "registra consumo de"
+ORDEN_TRABAJO          ||--o{ FACTURA                : "genera"
+ORDEN_TRABAJO          ||--o| RECLAMO_SEGURO         : "tiene"
+
+MATERIAL               ||--o{ ORDEN_TRABAJO_CONSUMO  : "consumido en"
+MATERIAL               ||--o{ MOVIMIENTO_INVENTARIO  : "afecta"
+MATERIAL               }o--|| CATEGORIA_MATERIAL     : "pertenece a"
+
+PROVEEDOR              ||--o{ MOVIMIENTO_INVENTARIO  : "origina"
+USUARIO                ||--o{ MOVIMIENTO_INVENTARIO  : "responsable de"
+
+FACTURA                ||--|{ FACTURA_LINEA          : "contiene"
+FACTURA                ||--o| COMPROBANTE_FISCAL     : "emite"
+FACTURA                ||--o{ PAGO                   : "recibe"
+FACTURA                ||--o{ DEVOLUCION             : "referenciada por"
+
+COMPROBANTE_FISCAL     }o--|| SECUENCIA_NCF          : "usa"
+
+DEVOLUCION             ||--o| NOTA_CREDITO           : "genera"
+
+PAGO                   ||--o| RECIBO_INGRESO         : "genera"
+
+USUARIO                }o--|| ROL                    : "tiene"
+
+@enduml
