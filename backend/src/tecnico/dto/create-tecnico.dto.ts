@@ -5,6 +5,10 @@ export class CreateTecnicoDto {
   @IsNotEmpty()
   nombre: string;
 
+  @IsString()
+  @IsNotEmpty()
+  especialidad: string;
+
   @IsBoolean()
   @IsOptional()
   activo?: boolean;

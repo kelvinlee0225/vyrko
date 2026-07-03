@@ -8,8 +8,17 @@ import { RolModule } from './rol/rol.module';
 import { UsuarioModule } from './usuario/usuario.module';
 import { ClienteModule } from './cliente/cliente.module';
 import { VehiculoModule } from './vehiculo/vehiculo.module';
+import { AseguradoraModule } from './aseguradora/aseguradora.module';
 import { TecnicoModule } from './tecnico/tecnico.module';
 import { EmpresaModule } from './empresa/empresa.module';
+import { CategoriaMaterialModule } from './categoria-material/categoria-material.module';
+import { MaterialModule } from './material/material.module';
+import { ProveedorModule } from './proveedor/proveedor.module';
+import { ServicioModule } from './servicio/servicio.module';
+import { PiezaModule } from './pieza/pieza.module';
+import { CotizacionModule } from './cotizacion/cotizacion.module';
+import { OrdenTrabajoModule } from './orden-trabajo/orden-trabajo.module';
+import { MovimientoInventarioModule } from './movimiento-inventario/movimiento-inventario.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
@@ -33,8 +42,17 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     UsuarioModule,
     ClienteModule,
     VehiculoModule,
+    AseguradoraModule,
     TecnicoModule,
     EmpresaModule,
+    CategoriaMaterialModule,
+    MaterialModule,
+    ProveedorModule,
+    ServicioModule,
+    PiezaModule,
+    CotizacionModule,
+    OrdenTrabajoModule,
+    MovimientoInventarioModule,
     AuthModule,
   ],
   controllers: [AppController],

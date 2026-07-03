@@ -10,6 +10,9 @@ export class CreateVehiculoDto {
   @IsUUID()
   clienteId: string;
 
+  @IsUUID()
+  aseguradoraId: string;
+
   @IsString()
   @IsNotEmpty()
   placa: string;
@@ -23,7 +26,7 @@ export class CreateVehiculoDto {
   modelo: string;
 
   @IsInt()
-  anio: number;
+  año: number;
 
   @IsString()
   @IsNotEmpty()

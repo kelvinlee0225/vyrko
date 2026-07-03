@@ -9,6 +9,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "rol" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "created_at" timestamp NOT NULL DEFAULT now(),
+        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         CONSTRAINT "PK_rol" PRIMARY KEY ("id")
       )
@@ -17,6 +19,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "cliente" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "created_at" timestamp NOT NULL DEFAULT now(),
+        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre_razon_social" varchar NOT NULL,
         "tipo_cliente" varchar NOT NULL,
         "cedula_rnc" varchar,
@@ -32,6 +36,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "tecnico" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "created_at" timestamp NOT NULL DEFAULT now(),
+        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         "activo" boolean NOT NULL,
         CONSTRAINT "PK_tecnico" PRIMARY KEY ("id")
@@ -41,6 +47,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "usuario" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "created_at" timestamp NOT NULL DEFAULT now(),
+        "updated_at" timestamp NOT NULL DEFAULT now(),
         "rol_id" uuid NOT NULL,
         "nombre" varchar NOT NULL,
         "username" varchar NOT NULL,
@@ -55,6 +63,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "vehiculo" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "created_at" timestamp NOT NULL DEFAULT now(),
+        "updated_at" timestamp NOT NULL DEFAULT now(),
         "cliente_id" uuid NOT NULL,
         "placa" varchar NOT NULL,
         "marca" varchar NOT NULL,
@@ -70,6 +80,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "empresa" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
+        "created_at" timestamp NOT NULL DEFAULT now(),
+        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         "rnc" varchar NOT NULL,
         "direccion" varchar NOT NULL,

@@ -1,9 +1,11 @@
 import {
   Column,
+  CreateDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Rol } from '../../rol/entities/rol.entity';
 
@@ -11,6 +13,12 @@ import { Rol } from '../../rol/entities/rol.entity';
 export class Usuario {
   @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
+  updatedAt: Date;
 
   @ManyToOne(() => Rol)
   @JoinColumn({ name: 'rol_id' })
