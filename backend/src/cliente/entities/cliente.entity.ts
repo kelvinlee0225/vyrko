@@ -23,6 +23,9 @@ export class Cliente {
   @Column({ type: 'varchar', name: 'tipo_cliente' })
   tipoCliente: string;
 
+  @Column({ type: 'boolean', name: 'es_aseguradora', default: false })
+  esAseguradora: boolean;
+
   @Column({ type: 'varchar', name: 'cedula_rnc', nullable: true })
   cedulaRnc: string | null;
 

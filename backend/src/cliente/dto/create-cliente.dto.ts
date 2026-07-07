@@ -1,4 +1,5 @@
 import {
+  IsBoolean,
   IsInt,
   IsNotEmpty,
   IsNumberString,
@@ -14,6 +15,10 @@ export class CreateClienteDto {
   @IsString()
   @IsNotEmpty()
   tipoCliente: string;
+
+  @IsBoolean()
+  @IsOptional()
+  esAseguradora?: boolean;
 
   @IsString()
   @IsOptional()

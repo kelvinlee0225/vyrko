@@ -19,6 +19,7 @@ import { PiezaModule } from './pieza/pieza.module';
 import { CotizacionModule } from './cotizacion/cotizacion.module';
 import { OrdenTrabajoModule } from './orden-trabajo/orden-trabajo.module';
 import { MovimientoInventarioModule } from './movimiento-inventario/movimiento-inventario.module';
+import { FacturaModule } from './factura/factura.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
@@ -53,6 +54,7 @@ import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
     CotizacionModule,
     OrdenTrabajoModule,
     MovimientoInventarioModule,
+    FacturaModule,
     AuthModule,
   ],
   controllers: [AppController],
