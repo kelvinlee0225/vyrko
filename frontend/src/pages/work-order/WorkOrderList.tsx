@@ -1,16 +1,17 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { StampBadge } from '../components/StampBadge'
-import { Button } from '../components/Button'
-import { IconPlus, IconSearch } from '../components/icons'
-import { useDataStore } from '../store/dataStore'
-import { NewWorkOrderModal } from '../components/forms/NewWorkOrderModal'
-import { formatDate } from '../utils/format'
+import { OrdenEstadoBadge } from '../../components/ui/StampBadge'
+import { Button } from '../../components/ui/Button'
+import { IconPlus, IconSearch } from '../../components/ui/icons'
+import { useApiList } from '../../hooks/useApiList'
+import { ordenTrabajoService } from '../../services/ordenTrabajo'
+import { NewWorkOrderModal } from '../../components/forms/NewWorkOrderModal'
+import { formatDate } from '../../utils/format'
 
-const columns = 'grid-cols-[120px_1fr_150px_150px_90px_100px_140px]'
+const columns = 'grid-cols-[150px_1fr_150px_90px_100px_140px]'
 
 export function WorkOrderList() {
-  const ordenesTrabajo = useDataStore((s) => s.ordenesTrabajo)
+  const { data: ordenesTrabajo, loading, error } = useApiList(ordenTrabajoService.list)
   const [query, setQuery] = useState('')
   const [showNewModal, setShowNewModal] = useState(false)
 
@@ -18,7 +19,7 @@ export function WorkOrderList() {
     const q = query.trim().toLowerCase()
     if (!q) return ordenesTrabajo
     return ordenesTrabajo.filter((o) =>
-      [o.numero, o.cliente.nombre, o.vehiculo.placa, o.vehiculo.marca, o.vehiculo.modelo].some((field) =>
+      [o.vehiculo.cliente.nombreRazonSocial, o.vehiculo.placa, o.vehiculo.marca, o.vehiculo.modelo].some((field) =>
         field.toLowerCase().includes(q),
       ),
     )
@@ -44,37 +45,34 @@ export function WorkOrderList() {
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Buscar por número, cliente o placa…"
+          placeholder="Buscar por cliente o placa…"
           className="w-full border-none bg-transparent text-[13.5px] text-ink outline-none placeholder:text-muted"
         />
       </label>
 
       <div className="overflow-x-auto rounded-lg border border-line bg-surface">
-        <div className={`grid ${columns} min-w-[950px] gap-4 border-b border-line bg-surface-alt px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.04em] text-muted`}>
-          <span>Número</span>
-          <span>Cliente</span>
+        <div className={`grid ${columns} min-w-[850px] gap-4 border-b border-line bg-surface-alt px-6 py-2 text-[11px] font-semibold uppercase tracking-[0.04em] text-muted`}>
           <span>Vehículo</span>
+          <span>Cliente</span>
           <span>Técnico</span>
           <span>Entrada</span>
           <span>Entrega est.</span>
           <span>Estado</span>
         </div>
-        <div className="flex min-w-[950px] flex-col">
-          {resultados.length === 0 && (
+        <div className="flex min-w-[850px] flex-col">
+          {loading && <p className="px-6 py-8 text-center text-[13px] text-muted">Cargando órdenes de trabajo…</p>}
+          {error && <p className="px-6 py-8 text-center text-[13px] text-error">{error}</p>}
+          {!loading && !error && resultados.length === 0 && (
             <p className="px-6 py-8 text-center text-[13px] text-muted">
               No se encontraron órdenes de trabajo para "{query}".
             </p>
           )}
           {resultados.map((o) => (
             <Link
-              to={`/ordenes/${o.numero}`}
-              key={o.numero}
+              to={`/ordenes/${o.id}`}
+              key={o.id}
               className={`grid ${columns} items-center gap-4 border-b border-line px-6 py-4 no-underline transition-colors last:border-b-0 hover:bg-surface-alt`}
             >
-              <span className="font-mono text-[13px] font-semibold tabular-nums text-ink">{o.numero}</span>
-              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-ink">
-                {o.cliente.nombre}
-              </span>
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-medium text-ink">
                   {o.vehiculo.placa}
@@ -82,6 +80,9 @@ export function WorkOrderList() {
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-muted">
                   {o.vehiculo.marca} {o.vehiculo.modelo}
                 </span>
+              </span>
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-ink">
+                {o.vehiculo.cliente.nombreRazonSocial}
               </span>
               <span className="flex min-w-0 flex-col gap-0.5">
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12.5px] text-ink">
@@ -96,7 +97,7 @@ export function WorkOrderList() {
                 {o.fechaEntregaEstimada ? formatDate(o.fechaEntregaEstimada) : '—'}
               </span>
               <span>
-                <StampBadge estado={o.estado} />
+                <OrdenEstadoBadge estado={o.estado} />
               </span>
             </Link>
           ))}

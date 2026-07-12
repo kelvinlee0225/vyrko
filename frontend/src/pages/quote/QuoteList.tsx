@@ -1,22 +1,22 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { StampBadge } from '../components/StampBadge'
-import { IconPlus, IconSearch } from '../components/icons'
-import { calcularTotales } from '../data/mockData'
-import { useDataStore } from '../store/dataStore'
-import { formatCurrency, formatDate } from '../utils/format'
+import { StampBadge } from '../../components/ui/StampBadge'
+import { IconPlus, IconSearch } from '../../components/ui/icons'
+import { useApiList } from '../../hooks/useApiList'
+import { cotizacionService } from '../../services/cotizacion'
+import { formatCurrency, formatDate } from '../../utils/format'
 
 const columns = 'grid-cols-[120px_1fr_150px_130px_85px_85px_100px_105px]'
 
 export function QuoteList() {
-  const cotizaciones = useDataStore((s) => s.cotizaciones)
+  const { data: cotizaciones, loading, error } = useApiList(cotizacionService.list)
   const [query, setQuery] = useState('')
 
   const resultados = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return cotizaciones
     return cotizaciones.filter((c) =>
-      [c.numero, c.cliente.nombre, c.vehiculo.placa, c.vehiculo.marca, c.vehiculo.modelo].some((field) =>
+      [c.numero, c.cliente.nombreRazonSocial, c.vehiculo.placa, c.vehiculo.marca, c.vehiculo.modelo].some((field) =>
         field.toLowerCase().includes(q),
       ),
     )
@@ -61,52 +61,51 @@ export function QuoteList() {
           <span>Estado</span>
         </div>
         <div className="flex min-w-[900px] flex-col">
-          {resultados.length === 0 && (
+          {loading && <p className="px-6 py-8 text-center text-[13px] text-muted">Cargando cotizaciones…</p>}
+          {error && <p className="px-6 py-8 text-center text-[13px] text-error">{error}</p>}
+          {!loading && !error && resultados.length === 0 && (
             <p className="px-6 py-8 text-center text-[13px] text-muted">
               No se encontraron cotizaciones para "{query}".
             </p>
           )}
-          {resultados.map((c) => {
-            const { total } = calcularTotales(c.lineas, c.descuentoGlobal)
-            return (
-              <Link
-                to={`/cotizaciones/${c.numero}`}
-                key={c.numero}
-                className={`grid ${columns} items-center gap-4 border-b border-line px-6 py-4 no-underline transition-colors last:border-b-0 hover:bg-surface-alt`}
-              >
-                <span className="font-mono text-[13px] font-semibold tabular-nums text-ink">{c.numero}</span>
-                <span className="flex min-w-0 flex-col gap-1">
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-ink">
-                    {c.cliente.nombre}
+          {resultados.map((c) => (
+            <Link
+              to={`/cotizaciones/${c.id}`}
+              key={c.id}
+              className={`grid ${columns} items-center gap-4 border-b border-line px-6 py-4 no-underline transition-colors last:border-b-0 hover:bg-surface-alt`}
+            >
+              <span className="font-mono text-[13px] font-semibold tabular-nums text-ink">{c.numero}</span>
+              <span className="flex min-w-0 flex-col gap-1">
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-ink">
+                  {c.cliente.nombreRazonSocial}
+                </span>
+                {c.cliente.esAseguradora && (
+                  <span className="inline-flex w-fit rounded-full bg-surface-alt px-2 py-[2px] text-[10px] font-medium text-muted">
+                    Aseguradora
                   </span>
-                  {c.cliente.esAseguradora && (
-                    <span className="inline-flex w-fit rounded-full bg-surface-alt px-2 py-[2px] text-[10px] font-medium text-muted">
-                      Aseguradora
-                    </span>
-                  )}
+                )}
+              </span>
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-medium text-ink">
+                  {c.vehiculo.placa}
                 </span>
-                <span className="flex min-w-0 flex-col gap-0.5">
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-medium text-ink">
-                    {c.vehiculo.placa}
-                  </span>
-                  <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-muted">
-                    {c.vehiculo.marca} {c.vehiculo.modelo}
-                  </span>
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-muted">
+                  {c.vehiculo.marca} {c.vehiculo.modelo}
                 </span>
-                <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12.5px] text-muted">
-                  {c.vehiculo.aseguradora === '—' ? 'Particular' : c.vehiculo.aseguradora}
-                </span>
-                <span className="text-[12.5px] text-muted">{formatDate(c.createdAt)}</span>
-                <span className="text-[12.5px] text-muted">{formatDate(c.fechaValidez)}</span>
-                <span className="text-right font-mono text-[13px] font-semibold tabular-nums text-ink">
-                  {formatCurrency(total)}
-                </span>
-                <span>
-                  <StampBadge estado={c.estado} />
-                </span>
-              </Link>
-            )
-          })}
+              </span>
+              <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12.5px] text-muted">
+                {c.vehiculo.aseguradora?.nombre ?? 'Particular'}
+              </span>
+              <span className="text-[12.5px] text-muted">{formatDate(c.createdAt.slice(0, 10))}</span>
+              <span className="text-[12.5px] text-muted">{formatDate(c.fechaValidez)}</span>
+              <span className="text-right font-mono text-[13px] font-semibold tabular-nums text-ink">
+                {formatCurrency(parseFloat(c.total))}
+              </span>
+              <span>
+                <StampBadge estado={c.estado} />
+              </span>
+            </Link>
+          ))}
         </div>
       </div>
     </div>

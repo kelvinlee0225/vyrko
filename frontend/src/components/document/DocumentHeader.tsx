@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { StampBadge } from '../StampBadge'
+import { StampBadge } from '../ui/StampBadge'
 
 interface DocumentHeaderProps {
   eyebrow: string
@@ -35,7 +35,7 @@ export function DocumentHeader({ eyebrow, numero, estado, meta, actions }: Docum
           </div>
         ))}
       </div>
-      {actions && <div className="flex w-full gap-2">{actions}</div>}
+      {actions && <div className="no-print flex w-full gap-2">{actions}</div>}
     </div>
   )
 }

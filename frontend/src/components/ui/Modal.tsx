@@ -1,4 +1,5 @@
 import { useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import { IconClose } from './icons'
 
 interface ModalProps {
@@ -17,7 +18,7 @@ export function Modal({ title, onClose, children, maxWidthClassName = 'max-w-xl'
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [onClose])
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/40 p-4 pt-[6vh]"
       onMouseDown={(e) => {
@@ -38,6 +39,7 @@ export function Modal({ title, onClose, children, maxWidthClassName = 'max-w-xl'
         </div>
         <div className="max-h-[75vh] overflow-y-auto px-6 py-5">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

@@ -1,8 +1,8 @@
-import { useState, type FormEvent } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useState, type SubmitEvent } from 'react'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-import { Button } from '../components/Button'
-import { useAuth } from '../context/useAuth'
+import { Button } from '../../components/ui/Button'
+import { useAuth } from '../../context/useAuth'
 
 const loginSchema = z.object({
   username: z.string().min(3, 'El usuario debe tener al menos 3 caracteres.'),
@@ -10,7 +10,7 @@ const loginSchema = z.object({
 })
 
 export function Login() {
-  const { login } = useAuth()
+  const { login, isAuthenticated, isLoading } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [username, setUsername] = useState('')
@@ -18,7 +18,20 @@ export function Login() {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  async function handleSubmit(e: FormEvent) {
+  // AuthProvider's bootstrapSession() runs on every mount regardless of route, so by the
+  // time isLoading clears we already know whether the refresh cookie is still valid — no
+  // need to render the form only to bounce away a moment later.
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[100svh] items-center justify-center bg-canvas text-[13px] text-muted">Cargando…</div>
+    )
+  }
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
 

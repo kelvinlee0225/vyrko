@@ -58,6 +58,7 @@
   html {
     color-scheme: light;
   }
+
   html[data-theme='dark'] {
     color-scheme: dark;
   }
@@ -74,7 +75,10 @@
     min-height: 100svh;
   }
 
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     @apply font-display font-semibold text-ink;
   }
 
@@ -84,9 +88,44 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.001ms !important;
       transition-duration: 0.001ms !important;
     }
+  }
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  @page {
+    margin: 0;
+    /* Clears the header and footer space */
+  }
+
+  /* Force light-theme colors regardless of the active theme toggle, so printed
+     text never renders as white-on-white when printing from dark mode. */
+  :root {
+    --color-canvas: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-alt: #f3f5f4;
+    --color-ink: #0b1218;
+    --color-muted: #2a3a46;
+    --color-line: #c7d0d6;
+  }
+
+  body {
+    background: #ffffff !important;
+    margin: 1.5cm;
+    /* Adjust to keep content from hitting the paper edge */
+  }
+
+  main {
+    padding: 0 !important;
   }
 }

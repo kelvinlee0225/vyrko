@@ -1,95 +1,103 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type SubmitEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-import { Modal } from '../Modal'
-import { Button } from '../Button'
+import { Modal } from '../ui/Modal'
+import { Button } from '../ui/Button'
 import { Field, fieldClass, FormError } from './fields'
-import { VehiculoFields } from './VehiculoFields'
 import { SearchableSelect } from './SearchableSelect'
-import { IconPlus, IconTrash } from '../icons'
-import { useDataStore, generateOrdenTrabajoNumero } from '../../store/dataStore'
-import { tecnicos, type ConsumoMaterial, type OrdenTrabajo, type Vehiculo } from '../../data/mockData'
+import { VehiculoPicker } from './VehiculoPicker'
+import { IconPlus, IconTrash } from '../ui/icons'
+import { useApiList } from '../../hooks/useApiList'
+import { clienteService } from '../../services/cliente'
+import { vehiculoService } from '../../services/vehiculo'
+import { tecnicoService } from '../../services/tecnico'
+import { cotizacionService } from '../../services/cotizacion'
+import { materialService } from '../../services/material'
+import { ordenTrabajoService, type CreateOrdenTrabajoConsumoDto } from '../../services/ordenTrabajo'
 
-const EMPTY_VEHICULO: Vehiculo = { marca: '', modelo: '', anio: new Date().getFullYear(), placa: '', color: '', vinChasis: '', aseguradora: '—' }
+interface ConsumoDraft {
+  materialId: string
+  cantidadReal: string
+}
 
 const schema = z.object({
-  clienteId: z.string().min(1, 'Selecciona un cliente.'),
-  tecnicoNombre: z.string().min(1, 'Selecciona un técnico.'),
+  vehiculoId: z.string().min(1, 'Selecciona un vehículo.'),
+  tecnicoId: z.string().min(1, 'Selecciona un técnico.'),
   fechaEntrada: z.string().min(1, 'Selecciona la fecha de entrada.'),
-  vehiculoPlaca: z.string().min(2, 'Ingresa la placa del vehículo.'),
 })
 
 export function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate()
-  const clientes = useDataStore((s) => s.clientes)
-  const cotizaciones = useDataStore((s) => s.cotizaciones)
-  const addOrdenTrabajo = useDataStore((s) => s.addOrdenTrabajo)
+  const { data: clientes } = useApiList(clienteService.list)
+  const { data: vehiculos, reload: reloadVehiculos } = useApiList(vehiculoService.list)
+  const { data: tecnicos } = useApiList(tecnicoService.list)
+  const { data: cotizaciones } = useApiList(cotizacionService.list)
+  const { data: materiales } = useApiList(materialService.list)
 
   const [clienteId, setClienteId] = useState('')
-  const [vehiculo, setVehiculo] = useState<Vehiculo>(EMPTY_VEHICULO)
-  const [tecnicoNombre, setTecnicoNombre] = useState('')
+  const [vehiculoId, setVehiculoId] = useState('')
+  const [tecnicoId, setTecnicoId] = useState('')
   const [fechaEntrada, setFechaEntrada] = useState(() => new Date().toISOString().slice(0, 10))
   const [fechaEntregaEstimada, setFechaEntregaEstimada] = useState('')
-  const [cotizacionRef, setCotizacionRef] = useState('')
+  const [cotizacionId, setCotizacionId] = useState('')
   const [descripcionTrabajo, setDescripcionTrabajo] = useState('')
-  const [consumos, setConsumos] = useState<ConsumoMaterial[]>([])
+  const [consumos, setConsumos] = useState<ConsumoDraft[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  const clienteSeleccionado = clientes.find((c) => c.cedulaRnc === clienteId)
+  const vehiculosCliente = vehiculos.filter((v) => v.cliente.id === clienteId)
 
-  function handleClienteChange(cedulaRnc: string) {
-    setClienteId(cedulaRnc)
-    const cliente = clientes.find((c) => c.cedulaRnc === cedulaRnc)
-    const primerVehiculo = cliente?.vehiculos[0]
-    setVehiculo(
-      primerVehiculo
-        ? { ...primerVehiculo, vinChasis: '', aseguradora: cliente?.esAseguradora ? cliente.nombre : '—' }
-        : EMPTY_VEHICULO,
-    )
+  function handleCotizacionChange(nuevaCotizacionId: string) {
+    setCotizacionId(nuevaCotizacionId)
+    const cotizacion = cotizaciones.find((c) => c.id === nuevaCotizacionId)
+    if (cotizacion) {
+      setClienteId(cotizacion.cliente.id)
+      setVehiculoId(cotizacion.vehiculo.id)
+    }
   }
 
-  function updateConsumo(index: number, patch: Partial<ConsumoMaterial>) {
+  function updateConsumo(index: number, patch: Partial<ConsumoDraft>) {
     setConsumos(consumos.map((c, i) => (i === index ? { ...c, ...patch } : c)))
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
+    e.stopPropagation()
     setError(null)
 
-    const parsed = schema.safeParse({ clienteId, tecnicoNombre, fechaEntrada, vehiculoPlaca: vehiculo.placa })
+    const parsed = schema.safeParse({ vehiculoId, tecnicoId, fechaEntrada })
     if (!parsed.success) {
       setError(parsed.error.issues[0].message)
       return
     }
-    const tecnico = tecnicos.find((t) => t.nombre === tecnicoNombre)
-    if (!clienteSeleccionado || !tecnico) {
-      setError('Selecciona un cliente y un técnico.')
+    const consumosValidos = consumos.filter((c) => c.materialId && c.cantidadReal)
+    if (consumos.some((c) => (c.materialId || c.cantidadReal) && (!c.materialId || !c.cantidadReal))) {
+      setError('Completa material y cantidad en cada línea de consumo, o elimínala.')
       return
     }
 
-    const nueva: OrdenTrabajo = {
-      numero: generateOrdenTrabajoNumero(),
-      estado: 'recibido',
-      fechaEntrada,
-      fechaEntregaEstimada: fechaEntregaEstimada || null,
-      fechaEntregaReal: null,
-      descripcionTrabajo: descripcionTrabajo || null,
-      tecnico,
-      cliente: {
-        nombre: clienteSeleccionado.nombre,
-        tipo: clienteSeleccionado.tipo,
-        cedulaRnc: clienteSeleccionado.cedulaRnc,
-        telefono: clienteSeleccionado.telefono,
-        correo: clienteSeleccionado.correo,
-        esAseguradora: clienteSeleccionado.esAseguradora,
-      },
-      vehiculo,
-      cotizacionRef: cotizacionRef || null,
-      consumos: consumos.filter((c) => c.material.trim()),
+    setSubmitting(true)
+    try {
+      const consumosDto: CreateOrdenTrabajoConsumoDto[] = consumosValidos.map((c) => ({
+        materialId: c.materialId,
+        cantidadReal: c.cantidadReal,
+      }))
+      const nueva = await ordenTrabajoService.create({
+        cotizacionId: cotizacionId || undefined,
+        vehiculoId,
+        tecnicoId,
+        fechaEntrada,
+        fechaEntregaEstimada: fechaEntregaEstimada || undefined,
+        descripcionTrabajo: descripcionTrabajo || undefined,
+        consumos: consumosDto.length > 0 ? consumosDto : undefined,
+      })
+      onClose()
+      navigate(`/ordenes/${nueva.id}`)
+    } catch {
+      setError('No se pudo crear la orden de trabajo. Verifica los datos e intenta de nuevo.')
+    } finally {
+      setSubmitting(false)
     }
-    addOrdenTrabajo(nueva)
-    onClose()
-    navigate(`/ordenes/${nueva.numero}`)
   }
 
   return (
@@ -97,20 +105,34 @@ export function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <FormError message={error} />
 
+        <Field label="Cotización de origen (opcional)">
+          <select value={cotizacionId} onChange={(e) => handleCotizacionChange(e.target.value)} className={fieldClass}>
+            <option value="">Ninguna — crear orden desde cero</option>
+            {cotizaciones.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.numero} — {c.cliente.nombreRazonSocial}
+              </option>
+            ))}
+          </select>
+        </Field>
+
         <div className="grid grid-cols-2 gap-3">
           <Field label="Cliente">
             <SearchableSelect
               value={clienteId}
-              onChange={handleClienteChange}
+              onChange={(value) => {
+                setClienteId(value)
+                setVehiculoId('')
+              }}
               placeholder="Buscar cliente…"
-              options={clientes.map((c) => ({ value: c.cedulaRnc, label: c.nombre, sublabel: c.cedulaRnc }))}
+              options={clientes.map((c) => ({ value: c.id, label: c.nombreRazonSocial, sublabel: c.cedulaRnc ?? undefined }))}
             />
           </Field>
           <Field label="Técnico asignado">
-            <select value={tecnicoNombre} onChange={(e) => setTecnicoNombre(e.target.value)} className={fieldClass}>
+            <select value={tecnicoId} onChange={(e) => setTecnicoId(e.target.value)} className={fieldClass}>
               <option value="">Selecciona un técnico…</option>
               {tecnicos.map((t) => (
-                <option key={t.nombre} value={t.nombre}>
+                <option key={t.id} value={t.id}>
                   {t.nombre} — {t.especialidad}
                 </option>
               ))}
@@ -120,10 +142,20 @@ export function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
 
         <div>
           <p className="mb-2 text-[12.5px] font-medium text-muted">Vehículo</p>
-          <VehiculoFields vehiculo={vehiculo} onChange={setVehiculo} />
+          {clienteId ? (
+            <VehiculoPicker
+              vehiculos={vehiculosCliente}
+              value={vehiculoId}
+              onChange={setVehiculoId}
+              clienteId={clienteId}
+              onVehiculoCreated={reloadVehiculos}
+            />
+          ) : (
+            <p className="text-[12.5px] text-muted">Selecciona un cliente primero.</p>
+          )}
         </div>
 
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3">
           <Field label="Entrada">
             <input type="date" value={fechaEntrada} onChange={(e) => setFechaEntrada(e.target.value)} className={fieldClass} />
           </Field>
@@ -134,16 +166,6 @@ export function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
               onChange={(e) => setFechaEntregaEstimada(e.target.value)}
               className={fieldClass}
             />
-          </Field>
-          <Field label="Cotización de origen (opcional)">
-            <select value={cotizacionRef} onChange={(e) => setCotizacionRef(e.target.value)} className={fieldClass}>
-              <option value="">Ninguna</option>
-              {cotizaciones.map((c) => (
-                <option key={c.numero} value={c.numero}>
-                  {c.numero}
-                </option>
-              ))}
-            </select>
           </Field>
         </div>
 
@@ -161,28 +183,29 @@ export function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
           <div className="flex flex-col gap-2">
             {consumos.map((consumo, index) => (
               <div key={index} className="flex min-w-0 gap-2">
-                <input
-                  type="text"
-                  value={consumo.material}
-                  onChange={(e) => updateConsumo(index, { material: e.target.value })}
-                  placeholder="Material"
-                  className={`${fieldClass} min-w-0 flex-1`}
-                />
-                <input
-                  type="number"
-                  min="0"
-                  step="0.5"
-                  value={consumo.cantidad}
-                  onChange={(e) => updateConsumo(index, { cantidad: parseFloat(e.target.value) || 0 })}
-                  className={`${fieldClass} w-24`}
-                />
-                <input
-                  type="text"
-                  value={consumo.unidad}
-                  onChange={(e) => updateConsumo(index, { unidad: e.target.value })}
-                  placeholder="Unidad"
-                  className={`${fieldClass} w-28`}
-                />
+                <div className="min-w-0 flex-1">
+                  <SearchableSelect
+                    value={consumo.materialId}
+                    onChange={(value) => updateConsumo(index, { materialId: value })}
+                    placeholder="Buscar material…"
+                    options={materiales.map((m) => ({
+                      value: m.id,
+                      label: m.nombre,
+                      sublabel: `${m.codigo} · Stock: ${m.stockActual}`,
+                    }))}
+                  />
+                </div>
+                <div className="w-24 flex-shrink-0">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={consumo.cantidadReal}
+                    onChange={(e) => updateConsumo(index, { cantidadReal: e.target.value })}
+                    placeholder="Cant."
+                    className={fieldClass}
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={() => setConsumos(consumos.filter((_, i) => i !== index))}
@@ -195,7 +218,7 @@ export function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
             ))}
             <button
               type="button"
-              onClick={() => setConsumos([...consumos, { material: '', cantidad: 1, unidad: 'unidad' }])}
+              onClick={() => setConsumos([...consumos, { materialId: '', cantidadReal: '' }])}
               className="flex items-center justify-center gap-2 rounded-md border border-dashed border-line py-2 text-[12.5px] font-medium text-muted transition-colors hover:border-brand hover:text-brand"
             >
               <IconPlus size={14} /> Agregar material
@@ -207,8 +230,8 @@ export function NewWorkOrderModal({ onClose }: { onClose: () => void }) {
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary">
-            Crear orden de trabajo
+          <Button type="submit" variant="primary" disabled={submitting}>
+            {submitting ? 'Creando…' : 'Crear orden de trabajo'}
           </Button>
         </div>
       </form>

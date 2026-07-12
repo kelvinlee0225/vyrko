@@ -1,25 +1,26 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { StampBadge } from '../components/StampBadge'
-import { IconPlus, IconSearch } from '../components/icons'
-import { calcularTotales } from '../data/mockData'
-import { useDataStore } from '../store/dataStore'
-import { formatCurrency, formatDate } from '../utils/format'
+import { StampBadge } from '../../components/ui/StampBadge'
+import { IconPlus, IconSearch } from '../../components/ui/icons'
+import { useApiList } from '../../hooks/useApiList'
+import { facturaService } from '../../services/factura'
+import { formatCurrency, formatDate } from '../../utils/format'
 
 const columns = 'grid-cols-[120px_1fr_150px_130px_95px_100px_100px_105px]'
 
 export function InvoiceList() {
-  const facturas = useDataStore((s) => s.facturas)
+  const { data: facturas, loading, error } = useApiList(facturaService.list)
   const [query, setQuery] = useState('')
 
   const resultados = useMemo(() => {
     const q = query.trim().toLowerCase()
     if (!q) return facturas
-    return facturas.filter((f) =>
-      [f.numero, f.cliente.nombre, f.vehiculo.placa, f.vehiculo.marca, f.vehiculo.modelo].some((field) =>
-        field.toLowerCase().includes(q),
-      ),
-    )
+    return facturas.filter((f) => {
+      const vehiculo = f.vehiculo
+      return [f.numero, f.cliente.nombreRazonSocial, vehiculo?.placa ?? '', vehiculo?.marca ?? '', vehiculo?.modelo ?? ''].some(
+        (field) => field.toLowerCase().includes(q),
+      )
+    })
   }, [query, facturas])
 
   return (
@@ -61,22 +62,23 @@ export function InvoiceList() {
           <span>Estado</span>
         </div>
         <div className="flex min-w-[980px] flex-col">
-          {resultados.length === 0 && (
+          {loading && <p className="px-6 py-8 text-center text-[13px] text-muted">Cargando facturas…</p>}
+          {error && <p className="px-6 py-8 text-center text-[13px] text-error">{error}</p>}
+          {!loading && !error && resultados.length === 0 && (
             <p className="px-6 py-8 text-center text-[13px] text-muted">No se encontraron facturas para "{query}".</p>
           )}
           {resultados.map((f) => {
-            const { total } = calcularTotales(f.lineas, f.descuentoGlobal)
-            const saldo = total - f.montoPagado
+            const saldo = parseFloat(f.saldoPendiente)
             return (
               <Link
-                to={`/facturacion/${f.numero}`}
-                key={f.numero}
+                to={`/facturacion/${f.id}`}
+                key={f.id}
                 className={`grid ${columns} items-center gap-4 border-b border-line px-6 py-4 no-underline transition-colors last:border-b-0 hover:bg-surface-alt`}
               >
                 <span className="font-mono text-[13px] font-semibold tabular-nums text-ink">{f.numero}</span>
                 <span className="flex min-w-0 flex-col gap-1">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[13px] font-medium text-ink">
-                    {f.cliente.nombre}
+                    {f.cliente.nombreRazonSocial}
                   </span>
                   {f.cliente.esAseguradora && (
                     <span className="inline-flex w-fit rounded-full bg-surface-alt px-2 py-[2px] text-[10px] font-medium text-muted">
@@ -86,18 +88,20 @@ export function InvoiceList() {
                 </span>
                 <span className="flex min-w-0 flex-col gap-0.5">
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-medium text-ink">
-                    {f.vehiculo.placa}
+                    {f.vehiculo?.placa ?? '—'}
                   </span>
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12px] text-muted">
-                    {f.vehiculo.marca} {f.vehiculo.modelo}
+                    {f.vehiculo ? `${f.vehiculo.marca} ${f.vehiculo.modelo}` : '—'}
                   </span>
                 </span>
                 <span className="overflow-hidden text-ellipsis whitespace-nowrap text-[12.5px] text-muted">
-                  {f.vehiculo.aseguradora === '—' ? 'Particular' : f.vehiculo.aseguradora}
+                  {f.vehiculo?.aseguradora?.nombre ?? 'Particular'}
                 </span>
-                <span className="text-[12.5px] text-muted">{formatDate(f.fechaVencimiento)}</span>
+                <span className="text-[12.5px] text-muted">
+                  {f.fechaVencimiento ? formatDate(f.fechaVencimiento) : '—'}
+                </span>
                 <span className="text-right font-mono text-[13px] font-semibold tabular-nums text-ink">
-                  {formatCurrency(total)}
+                  {formatCurrency(parseFloat(f.total))}
                 </span>
                 <span
                   className={`text-right font-mono text-[13px] font-semibold tabular-nums ${saldo > 0 ? 'text-accent' : 'text-muted'}`}

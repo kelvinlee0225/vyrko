@@ -1,28 +1,23 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type SubmitEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { z } from 'zod'
-import { Modal } from '../Modal'
-import { Button } from '../Button'
+import { Modal } from '../ui/Modal'
+import { Button } from '../ui/Button'
 import { Field, fieldClass, FormError } from './fields'
-import { useDataStore } from '../../store/dataStore'
-import type { ClienteDirectorio } from '../../data/mockData'
+import { clienteService } from '../../services/cliente'
 
 const schema = z.object({
-  nombre: z.string().min(2, 'Ingresa el nombre o razón social.'),
-  tipo: z.enum(['Persona física', 'Persona jurídica']),
-  cedulaRnc: z.string().min(9, 'Ingresa una cédula o RNC válida.'),
+  nombreRazonSocial: z.string().min(2, 'Ingresa el nombre o razón social.'),
+  tipoCliente: z.enum(['Persona física', 'Persona jurídica']),
   telefono: z.string().min(7, 'Ingresa un teléfono válido.'),
   correo: z.union([z.string().email('Correo inválido.'), z.literal('')]),
-  direccion: z.string().min(3, 'Ingresa una dirección.'),
 })
 
 export function NewClientModal({ onClose }: { onClose: () => void }) {
   const navigate = useNavigate()
-  const clientes = useDataStore((s) => s.clientes)
-  const addCliente = useDataStore((s) => s.addCliente)
 
-  const [nombre, setNombre] = useState('')
-  const [tipo, setTipo] = useState<'Persona física' | 'Persona jurídica'>('Persona física')
+  const [nombreRazonSocial, setNombreRazonSocial] = useState('')
+  const [tipoCliente, setTipoCliente] = useState<'Persona física' | 'Persona jurídica'>('Persona física')
   const [cedulaRnc, setCedulaRnc] = useState('')
   const [telefono, setTelefono] = useState('')
   const [correo, setCorreo] = useState('')
@@ -31,36 +26,39 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
   const [limiteCredito, setLimiteCredito] = useState('')
   const [diasCredito, setDiasCredito] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
+    e.stopPropagation()
     setError(null)
 
-    const parsed = schema.safeParse({ nombre, tipo, cedulaRnc, telefono, correo, direccion })
+    const parsed = schema.safeParse({ nombreRazonSocial, tipoCliente, telefono, correo })
     if (!parsed.success) {
       setError(parsed.error.issues[0].message)
       return
     }
-    if (clientes.some((c) => c.cedulaRnc === cedulaRnc)) {
-      setError('Ya existe un cliente con esa cédula/RNC.')
-      return
-    }
 
-    const nuevo: ClienteDirectorio = {
-      nombre,
-      tipo,
-      cedulaRnc,
-      telefono,
-      correo,
-      esAseguradora,
-      direccion,
-      limiteCredito: limiteCredito ? parseFloat(limiteCredito) : null,
-      diasCredito: diasCredito ? parseInt(diasCredito, 10) : null,
-      vehiculos: [],
+    setSubmitting(true)
+    try {
+      const nuevo = await clienteService.create({
+        nombreRazonSocial,
+        tipoCliente,
+        esAseguradora,
+        cedulaRnc: cedulaRnc || undefined,
+        telefono,
+        correo: correo || undefined,
+        direccion: direccion || undefined,
+        limiteCredito: limiteCredito || undefined,
+        diasCredito: diasCredito ? parseInt(diasCredito, 10) : undefined,
+      })
+      onClose()
+      navigate(`/clientes/${nuevo.id}`)
+    } catch {
+      setError('No se pudo registrar el cliente. Intenta de nuevo.')
+    } finally {
+      setSubmitting(false)
     }
-    addCliente(nuevo)
-    onClose()
-    navigate(`/clientes/${nuevo.cedulaRnc}`)
   }
 
   return (
@@ -69,21 +67,26 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
         <FormError message={error} />
 
         <Field label="Nombre / Razón social">
-          <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className={fieldClass} />
+          <input
+            type="text"
+            value={nombreRazonSocial}
+            onChange={(e) => setNombreRazonSocial(e.target.value)}
+            className={fieldClass}
+          />
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Tipo">
             <select
-              value={tipo}
-              onChange={(e) => setTipo(e.target.value as 'Persona física' | 'Persona jurídica')}
+              value={tipoCliente}
+              onChange={(e) => setTipoCliente(e.target.value as 'Persona física' | 'Persona jurídica')}
               className={fieldClass}
             >
               <option value="Persona física">Persona física</option>
               <option value="Persona jurídica">Persona jurídica</option>
             </select>
           </Field>
-          <Field label="Cédula / RNC">
+          <Field label="Cédula / RNC (opcional)">
             <input type="text" value={cedulaRnc} onChange={(e) => setCedulaRnc(e.target.value)} className={fieldClass} />
           </Field>
         </div>
@@ -92,12 +95,12 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
           <Field label="Teléfono">
             <input type="text" value={telefono} onChange={(e) => setTelefono(e.target.value)} className={fieldClass} />
           </Field>
-          <Field label="Correo">
+          <Field label="Correo (opcional)">
             <input type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} className={fieldClass} />
           </Field>
         </div>
 
-        <Field label="Dirección">
+        <Field label="Dirección (opcional)">
           <input type="text" value={direccion} onChange={(e) => setDireccion(e.target.value)} className={fieldClass} />
         </Field>
 
@@ -136,8 +139,8 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
           <Button type="button" variant="secondary" onClick={onClose}>
             Cancelar
           </Button>
-          <Button type="submit" variant="primary">
-            Registrar cliente
+          <Button type="submit" variant="primary" disabled={submitting}>
+            {submitting ? 'Registrando…' : 'Registrar cliente'}
           </Button>
         </div>
       </form>

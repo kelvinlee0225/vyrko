@@ -1,29 +1,72 @@
-import type { LineaItem } from '../../data/mockData'
-import { IconPlus, IconTrash } from '../icons'
+import { IconPlus, IconTrash } from '../ui/icons'
 import { fieldClass } from './fields'
+import { SearchableSelect } from './SearchableSelect'
+import { useApiList } from '../../hooks/useApiList'
+import { servicioService } from '../../services/servicio'
+import { piezaService } from '../../services/pieza'
 import { formatCurrency } from '../../utils/format'
+import { emptyLinea, type LineaItemDraft } from './lineaItemDraft'
 
 interface LineItemsEditorProps {
-  lineas: LineaItem[]
-  onChange: (lineas: LineaItem[]) => void
+  lineas: LineaItemDraft[]
+  onChange: (lineas: LineaItemDraft[]) => void
 }
 
-function computeItbis(cantidad: number, precioUnitario: number) {
+function computeItbis(cantidad: number, precioUnitario: number, llevaItbis: boolean) {
+  if (!llevaItbis) return 0
   return Math.round(cantidad * precioUnitario * 0.18 * 100) / 100
 }
 
-function emptyLinea(): LineaItem {
-  return { descripcion: '', tipo: 'servicio', cantidad: 1, precioUnitario: 0, itbis: 0 }
+function autoLabel(servicioNombre?: string, piezaNombre?: string) {
+  if (!servicioNombre) return ''
+  return piezaNombre ? `${servicioNombre} · ${piezaNombre}` : servicioNombre
 }
 
 export function LineItemsEditor({ lineas, onChange }: LineItemsEditorProps) {
-  function updateLinea(index: number, patch: Partial<LineaItem>) {
+  const { data: servicios } = useApiList(servicioService.list)
+  const { data: piezas } = useApiList(piezaService.list)
+
+  function updateLinea(index: number, patch: Partial<LineaItemDraft>) {
     const next = lineas.map((l, i) => (i === index ? { ...l, ...patch } : l))
     if (patch.cantidad !== undefined || patch.precioUnitario !== undefined) {
       const linea = next[index]
-      next[index] = { ...linea, itbis: computeItbis(linea.cantidad, linea.precioUnitario) }
+      const servicio = servicios.find((s) => s.id === linea.servicioId)
+      next[index] = { ...linea, itbis: computeItbis(linea.cantidad, linea.precioUnitario, servicio?.llevaItbis ?? true) }
     }
     onChange(next)
+  }
+
+  function handleServicioChange(index: number, servicioId: string) {
+    const servicio = servicios.find((s) => s.id === servicioId)
+    const linea = lineas[index]
+    const servicioAnterior = servicios.find((s) => s.id === linea.servicioId)
+    const pieza = piezas.find((p) => p.id === (linea.piezaId ?? undefined))
+    const labelAnterior = autoLabel(servicioAnterior?.nombre, pieza?.nombre)
+    const descripcion =
+      !linea.descripcion || linea.descripcion === labelAnterior
+        ? autoLabel(servicio?.nombre, pieza?.nombre)
+        : linea.descripcion
+    updateLinea(index, {
+      servicioId,
+      descripcion,
+      precioUnitario: servicio ? parseFloat(servicio.precioBase) : linea.precioUnitario,
+      itbis: servicio
+        ? computeItbis(linea.cantidad, parseFloat(servicio.precioBase), servicio.llevaItbis)
+        : linea.itbis,
+    })
+  }
+
+  function handlePiezaChange(index: number, piezaId: string) {
+    const linea = lineas[index]
+    const servicio = servicios.find((s) => s.id === linea.servicioId)
+    const piezaAnterior = piezas.find((p) => p.id === (linea.piezaId ?? undefined))
+    const piezaNueva = piezas.find((p) => p.id === piezaId)
+    const labelAnterior = autoLabel(servicio?.nombre, piezaAnterior?.nombre)
+    const descripcion =
+      !linea.descripcion || linea.descripcion === labelAnterior
+        ? autoLabel(servicio?.nombre, piezaNueva?.nombre)
+        : linea.descripcion
+    updateLinea(index, { piezaId: piezaId || null, descripcion })
   }
 
   function removeLinea(index: number) {
@@ -37,21 +80,26 @@ export function LineItemsEditor({ lineas, onChange }: LineItemsEditorProps) {
         return (
           <div key={index} className="flex min-w-0 flex-col gap-2 rounded-md border border-line bg-canvas p-3">
             <div className="flex min-w-0 gap-2">
-              <input
-                type="text"
-                value={linea.descripcion}
-                onChange={(e) => updateLinea(index, { descripcion: e.target.value })}
-                placeholder="Descripción"
-                className={`${fieldClass} min-w-0 flex-1`}
-              />
-              <select
-                value={linea.tipo}
-                onChange={(e) => updateLinea(index, { tipo: e.target.value as LineaItem['tipo'] })}
-                className={`${fieldClass} w-32`}
-              >
-                <option value="servicio">Servicio</option>
-                <option value="pieza">Pieza</option>
-              </select>
+              <div className="min-w-0 flex-1">
+                <SearchableSelect
+                  value={linea.servicioId}
+                  onChange={(value) => handleServicioChange(index, value)}
+                  placeholder="Buscar servicio…"
+                  options={servicios.map((s) => ({
+                    value: s.id,
+                    label: s.nombre,
+                    sublabel: `${s.tipoTrabajo} · ${formatCurrency(parseFloat(s.precioBase))}`,
+                  }))}
+                />
+              </div>
+              <div className="w-48 flex-shrink-0">
+                <SearchableSelect
+                  value={linea.piezaId ?? ''}
+                  onChange={(value) => handlePiezaChange(index, value)}
+                  placeholder="Pieza (opcional)…"
+                  options={piezas.map((p) => ({ value: p.id, label: p.nombre }))}
+                />
+              </div>
               <button
                 type="button"
                 onClick={() => removeLinea(index)}
@@ -62,7 +110,14 @@ export function LineItemsEditor({ lineas, onChange }: LineItemsEditorProps) {
                 <IconTrash size={15} />
               </button>
             </div>
-            <div className="grid min-w-0 grid-cols-4 gap-2">
+            <input
+              type="text"
+              value={linea.descripcion}
+              onChange={(e) => updateLinea(index, { descripcion: e.target.value })}
+              placeholder="Descripción"
+              className={fieldClass}
+            />
+            <div className="grid grid-cols-4 gap-2">
               <label className="flex flex-col gap-1">
                 <span className="text-[11px] text-muted">Cantidad</span>
                 <input
@@ -97,7 +152,7 @@ export function LineItemsEditor({ lineas, onChange }: LineItemsEditorProps) {
                 />
               </label>
               <div className="flex flex-col gap-1">
-                <span className="text-[11px] text-muted">Importe (+18% ITBIS)</span>
+                <span className="text-[11px] text-muted">Importe (+ITBIS)</span>
                 <span className="flex h-9 items-center text-[13px] font-semibold tabular-nums text-ink">
                   {formatCurrency(importe)}
                 </span>

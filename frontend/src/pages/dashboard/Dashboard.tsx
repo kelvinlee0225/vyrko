@@ -1,14 +1,15 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { StatTiles } from '../components/StatTiles'
-import { StampBadge } from '../components/StampBadge'
-import { Button } from '../components/Button'
-import { IconQuote, IconInvoice, IconCustomers, IconWorkOrder, IconPlus } from '../components/icons'
-import { actividadReciente } from '../data/mockData'
-import { useEstadisticasPanel } from '../store/dataStore'
-import { useAuth } from '../context/useAuth'
-import { NewWorkOrderModal } from '../components/forms/NewWorkOrderModal'
-import { NewClientModal } from '../components/forms/NewClientModal'
+import { StatTiles } from '../../components/ui/StatTiles'
+import { OrdenEstadoBadge, StampBadge } from '../../components/ui/StampBadge'
+import { Button } from '../../components/ui/Button'
+import { IconQuote, IconInvoice, IconCustomers, IconWorkOrder, IconInventory, IconPlus } from '../../components/ui/icons'
+import { useEstadisticasPanel } from '../../hooks/useEstadisticasPanel'
+import { useAuth } from '../../context/useAuth'
+import { NewWorkOrderModal } from '../../components/forms/NewWorkOrderModal'
+import { NewClientModal } from '../../components/forms/NewClientModal'
+import { NewMovimientoModal } from '../../components/forms/NewMovimientoModal'
+import { formatCurrency, formatDate } from '../../utils/format'
 
 const iconoPorTipo = {
   factura: IconInvoice,
@@ -16,20 +17,54 @@ const iconoPorTipo = {
   orden: IconWorkOrder,
 }
 
-type ModalKind = 'workorder' | 'client' | null
+type ModalKind = 'workorder' | 'client' | 'movimiento' | null
 
 const accesos = [
   { label: 'Nueva cotización', icon: IconQuote, to: '/cotizaciones/nueva' },
   { label: 'Nueva factura', icon: IconInvoice, to: '/facturacion/nueva' },
   { label: 'Registrar cliente', icon: IconCustomers, modal: 'client' as const },
   { label: 'Nueva orden de trabajo', icon: IconWorkOrder, modal: 'workorder' as const },
+  { label: 'Registrar movimiento de inventario', icon: IconInventory, modal: 'movimiento' as const },
 ]
 
 export function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const estadisticasPanel = useEstadisticasPanel()
+  const { items: estadisticasPanel, cotizaciones, facturas, ordenesTrabajo } = useEstadisticasPanel()
   const [openModal, setOpenModal] = useState<ModalKind>(null)
+
+  const actividadReciente = useMemo(() => {
+    const cotizacionItems = cotizaciones.map((c) => ({
+      tipo: 'cotizacion' as const,
+      key: c.id,
+      numero: c.numero,
+      descripcion: c.cliente.nombreRazonSocial,
+      monto: formatCurrency(parseFloat(c.total)),
+      estado: c.estado,
+      createdAt: c.createdAt,
+    }))
+    const facturaItems = facturas.map((f) => ({
+      tipo: 'factura' as const,
+      key: f.id,
+      numero: f.numero,
+      descripcion: f.cliente.nombreRazonSocial,
+      monto: formatCurrency(parseFloat(f.total)),
+      estado: f.estado,
+      createdAt: f.createdAt,
+    }))
+    const ordenItems = ordenesTrabajo.map((o) => ({
+      tipo: 'orden' as const,
+      key: o.id,
+      numero: o.vehiculo.placa,
+      descripcion: o.vehiculo.cliente.nombreRazonSocial,
+      monto: '—',
+      estado: o.estado,
+      createdAt: o.createdAt,
+    }))
+    return [...cotizacionItems, ...facturaItems, ...ordenItems]
+      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      .slice(0, 6)
+  }, [cotizaciones, facturas, ordenesTrabajo])
 
   return (
     <div className="flex flex-col gap-8">
@@ -61,13 +96,13 @@ export function Dashboard() {
             </Link>
           </div>
           <div className="flex flex-col">
+            {actividadReciente.length === 0 && (
+              <p className="px-6 py-8 text-center text-[13px] text-muted">Sin actividad registrada todavía.</p>
+            )}
             {actividadReciente.map((item) => {
-              const Icon = iconoPorTipo[item.tipo as keyof typeof iconoPorTipo]
+              const Icon = iconoPorTipo[item.tipo]
               return (
-                <div
-                  className="flex items-center gap-4 border-b border-line px-6 py-4 last:border-b-0"
-                  key={item.numero}
-                >
+                <div className="flex items-center gap-4 border-b border-line px-6 py-4 last:border-b-0" key={item.key}>
                   <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-surface-alt text-brand">
                     <Icon size={16} />
                   </span>
@@ -80,8 +115,14 @@ export function Dashboard() {
                   <span className="flex-shrink-0 font-mono text-[13px] font-semibold tabular-nums text-ink">
                     {item.monto}
                   </span>
-                  <StampBadge estado={item.estado} />
-                  <span className="w-16 flex-shrink-0 text-right text-[11.5px] text-muted">{item.hora}</span>
+                  {item.tipo === 'orden' ? (
+                    <OrdenEstadoBadge estado={item.estado} />
+                  ) : (
+                    <StampBadge estado={item.estado} />
+                  )}
+                  <span className="w-20 flex-shrink-0 text-right text-[11.5px] text-muted">
+                    {formatDate(item.createdAt.slice(0, 10))}
+                  </span>
                 </div>
               )
             })}
@@ -128,6 +169,7 @@ export function Dashboard() {
 
       {openModal === 'workorder' && <NewWorkOrderModal onClose={() => setOpenModal(null)} />}
       {openModal === 'client' && <NewClientModal onClose={() => setOpenModal(null)} />}
+      {openModal === 'movimiento' && <NewMovimientoModal onClose={() => setOpenModal(null)} />}
     </div>
   )
 }

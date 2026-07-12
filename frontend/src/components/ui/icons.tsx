@@ -144,6 +144,24 @@ export function IconPin({ size = 14 }: IconProps) {
   )
 }
 
+export function IconCatalog({ size = 20 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M12 3.5 20 8l-8 4.5L4 8Z" />
+      <path d="m4 12.5 8 4.5 8-4.5" />
+      <path d="m4 16.5 8 4.5 8-4.5" />
+    </svg>
+  )
+}
+
+export function IconWrench({ size = 20 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L4 16.5V20h3.5l5.3-5.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.4-2.4Z" />
+    </svg>
+  )
+}
+
 export function IconDownload({ size = 16 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>

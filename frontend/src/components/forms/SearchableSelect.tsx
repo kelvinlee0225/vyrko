@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { fieldClass } from './fields'
-import { IconChevronDown, IconSearch } from '../icons'
+import { IconChevronDown, IconSearch } from '../ui/icons'
 
 export interface SearchableSelectOption {
   value: string
@@ -15,11 +15,38 @@ interface SearchableSelectProps {
   placeholder?: string
 }
 
+/** Bounds of the nearest scrollable ancestor — the dropdown gets clipped against it, not the viewport. */
+function findScrollBoundary(el: HTMLElement): { top: number; bottom: number } {
+  let node = el.parentElement
+  while (node) {
+    const overflowY = getComputedStyle(node).overflowY
+    if (overflowY === 'auto' || overflowY === 'scroll') {
+      const rect = node.getBoundingClientRect()
+      return { top: rect.top, bottom: rect.bottom }
+    }
+    node = node.parentElement
+  }
+  return { top: 0, bottom: window.innerHeight }
+}
+
+// max-h-56 (224px) plus breathing room — if less than this fits below, open upward.
+const DROPDOWN_SPACE = 240
+
 export function SearchableSelect({ options, value, onChange, placeholder = 'Buscar…' }: SearchableSelectProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
   const [highlighted, setHighlighted] = useState(0)
+  const [dropUp, setDropUp] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open || !containerRef.current) return
+    const rect = containerRef.current.getBoundingClientRect()
+    const boundary = findScrollBoundary(containerRef.current)
+    const spaceBelow = boundary.bottom - rect.bottom
+    const spaceAbove = rect.top - boundary.top
+    setDropUp(spaceBelow < DROPDOWN_SPACE && spaceAbove > spaceBelow)
+  }, [open])
 
   const selected = options.find((o) => o.value === value)
 
@@ -91,7 +118,11 @@ export function SearchableSelect({ options, value, onChange, placeholder = 'Busc
         </span>
       </div>
       {open && (
-        <div className="absolute left-0 right-0 top-full z-20 mt-1 max-h-56 overflow-y-auto rounded-md border border-line bg-surface py-1 shadow-lg">
+        <div
+          className={`absolute left-0 right-0 z-20 max-h-56 overflow-y-auto rounded-md border border-line bg-surface py-1 shadow-lg ${
+            dropUp ? 'bottom-full mb-1' : 'top-full mt-1'
+          }`}
+        >
           {filtered.length === 0 && <p className="px-3 py-2 text-[12.5px] text-muted">Sin resultados.</p>}
           {filtered.map((option, index) => (
             <button

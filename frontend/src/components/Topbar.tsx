@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { ThemeToggle } from './ThemeToggle'
-import { IconChevronDown } from './icons'
+import { ThemeToggle } from './ui/ThemeToggle'
+import { IconChevronDown } from './ui/icons'
 import { useAuth } from '../context/useAuth'
 
 export function Topbar() {
@@ -26,7 +26,7 @@ export function Topbar() {
     .toUpperCase()
 
   return (
-    <header className="sticky top-0 z-[5] flex items-center justify-end gap-6 border-b border-line bg-canvas px-8 py-4">
+    <header className="no-print sticky top-0 z-[5] flex items-center justify-end gap-6 border-b border-line bg-canvas px-8 py-4">
       <div className="flex items-center gap-4">
         <ThemeToggle />
         <div className="relative" ref={menuRef}>

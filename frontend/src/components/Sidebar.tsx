@@ -7,14 +7,22 @@ import {
   IconInvoice,
   IconCustomers,
   IconInventory,
+  IconWrench,
+  IconCatalog,
   IconSettings,
   IconPin,
-} from './icons'
-import { useDataStore } from '../store/dataStore'
+} from './ui/icons'
+import { useApiList } from '../hooks/useApiList'
+import { cotizacionService } from '../services/cotizacion'
+import { ordenTrabajoService } from '../services/ordenTrabajo'
+import { materialService } from '../services/material'
+import { useAuth } from '../context/useAuth'
 
 export function Sidebar() {
-  const cotizaciones = useDataStore((s) => s.cotizaciones)
-  const ordenesTrabajo = useDataStore((s) => s.ordenesTrabajo)
+  const { user } = useAuth()
+  const { data: cotizaciones } = useApiList(cotizacionService.list)
+  const { data: ordenesTrabajo } = useApiList(ordenTrabajoService.list)
+  const { data: materiales } = useApiList(materialService.list)
   const [pinned, setPinned] = useState(() => localStorage.getItem('sidebar-pinned') === '1')
   const [hovered, setHovered] = useState(false)
   const expanded = pinned || hovered
@@ -23,8 +31,9 @@ export function Sidebar() {
     localStorage.setItem('sidebar-pinned', pinned ? '1' : '0')
   }, [pinned])
 
-  const cotizacionesPendientes = cotizaciones.filter((c) => c.estado === 'enviada').length
-  const ordenesAbiertas = ordenesTrabajo.filter((o) => o.estado !== 'entregado' && o.estado !== 'cancelado').length
+  const cotizacionesPendientes = cotizaciones.filter((c) => c.estado === 'entregada').length
+  const ordenesAbiertas = ordenesTrabajo.filter((o) => o.estado !== 'entregada' && o.estado !== 'cancelada').length
+  const materialesBajoStock = materiales.filter((m) => parseFloat(m.stockActual) <= m.stockMinimo).length
 
   const navItems = [
     { to: '/', label: 'Panel principal', icon: IconPanel, end: true },
@@ -32,7 +41,9 @@ export function Sidebar() {
     { to: '/ordenes', label: 'Órdenes de trabajo', icon: IconWorkOrder, badge: String(ordenesAbiertas) },
     { to: '/facturacion', label: 'Facturación', icon: IconInvoice },
     { to: '/clientes', label: 'Clientes', icon: IconCustomers },
-    { to: '/inventario', label: 'Inventario', icon: IconInventory, disabled: true },
+    { to: '/inventario', label: 'Inventario', icon: IconInventory, badge: String(materialesBajoStock) },
+    { to: '/catalogos', label: 'Catálogos', icon: IconCatalog },
+    ...(user?.rol === 'admin' ? [{ to: '/tecnicos', label: 'Técnicos', icon: IconWrench }] : []),
   ]
 
   const itemClass = (extra = '') =>
@@ -42,7 +53,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className={`sticky top-0 z-10 flex h-[100svh] flex-shrink-0 flex-col overflow-hidden border-r border-line bg-surface px-2 py-6 transition-[width] duration-150 ${
+      className={`no-print sticky top-0 z-10 flex h-[100svh] flex-shrink-0 flex-col overflow-hidden border-r border-line bg-surface px-2 py-6 transition-[width] duration-150 ${
         expanded ? 'w-[232px]' : 'w-16'
       }`}
       onMouseEnter={() => setHovered(true)}
@@ -74,19 +85,6 @@ export function Sidebar() {
       <nav className="flex flex-col gap-0.5">
         {navItems.map((item) => {
           const Icon = item.icon
-          if (item.disabled) {
-            return (
-              <div className={itemClass('cursor-default opacity-50')} key={item.to} title="Próximamente">
-                <Icon />
-                {expanded && (
-                  <>
-                    <span>{item.label}</span>
-                    <span className="ml-auto text-[10px] uppercase tracking-[0.04em] text-muted">Pronto</span>
-                  </>
-                )}
-              </div>
-            )
-          }
           return (
             <NavLink
               to={item.to}

@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes, ReactNode } from 'react'
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'danger'
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success'
   icon?: ReactNode
 }
 
@@ -9,6 +9,10 @@ const variantClasses = {
   primary: 'bg-brand text-inverse hover:bg-brand-hover',
   secondary: 'bg-surface text-ink border-line hover:border-brand hover:text-brand',
   danger: 'bg-transparent text-accent border-accent hover:bg-accent hover:text-inverse',
+  // Low-emphasis: no border, mirrors the hover treatment Sidebar/Topbar already use for tertiary actions.
+  ghost: 'bg-transparent text-muted hover:bg-surface-alt hover:text-ink',
+  // Reuses the success tone/soft pairing from StampBadge, so a "positive" action reads consistently with the status pills.
+  success: 'bg-success-soft text-success hover:bg-success hover:text-inverse',
 }
 
 export function Button({ variant = 'primary', icon, children, className, ...rest }: ButtonProps) {
