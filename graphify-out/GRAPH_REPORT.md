@@ -1,16 +1,16 @@
-# Graph Report - vyrko  (2026-07-07)
+# Graph Report - vyrko  (2026-07-11)
 
 ## Corpus Check
-- 191 files · ~31,984 words
+- 240 files · ~46,742 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1195 nodes · 2665 edges · 60 communities (43 shown, 17 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 43 edges (avg confidence: 0.76)
+- 1396 nodes · 3245 edges · 78 communities (55 shown, 23 thin omitted)
+- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 53 edges (avg confidence: 0.77)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `999fb271`
+- Built from commit: `b6a79d01`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -65,37 +65,55 @@
 - [[_COMMUNITY_AddInventoryCatalog1783024534404|AddInventoryCatalog1783024534404]]
 - [[_COMMUNITY_mockData.ts|mockData.ts]]
 - [[_COMMUNITY_useDataStore|useDataStore]]
-- [[_COMMUNITY_JwtAuthGuard|JwtAuthGuard]]
+- [[_COMMUNITY_AseguradoraService|AseguradoraService]]
+- [[_COMMUNITY_ProveedorService|ProveedorService]]
+- [[_COMMUNITY_index.ts|index.ts]]
+- [[_COMMUNITY_cotizacion.ts|cotizacion.ts]]
+- [[_COMMUNITY_PiezaService|PiezaService]]
+- [[_COMMUNITY_crud.ts|crud.ts]]
+- [[_COMMUNITY_factura.ts|factura.ts]]
+- [[_COMMUNITY_ordenTrabajo.ts|ordenTrabajo.ts]]
+- [[_COMMUNITY_api.ts|api.ts]]
+- [[_COMMUNITY_vehiculo.ts|vehiculo.ts]]
+- [[_COMMUNITY_AppModule|AppModule]]
+- [[_COMMUNITY_InitSchema1782869686899|InitSchema1782869686899]]
 - [[_COMMUNITY_AddInventoryCatalog1783024534404|AddInventoryCatalog1783024534404]]
 - [[_COMMUNITY_AddAseguradora1783025395234|AddAseguradora1783025395234]]
-- [[_COMMUNITY_AddCotizacion1783043552605|AddCotizacion1783043552605]]
 - [[_COMMUNITY_AddOrdenTrabajo1783046143655|AddOrdenTrabajo1783046143655]]
-- [[_COMMUNITY_AddMovimientoInventario1783051968531|AddMovimientoInventario1783051968531]]
 - [[_COMMUNITY_AddFactura1783108899928|AddFactura1783108899928]]
+- [[_COMMUNITY_OrdenTrabajoController|OrdenTrabajoController]]
+- [[_COMMUNITY_roles.guard.ts|roles.guard.ts]]
+- [[_COMMUNITY_Pieza|Pieza]]
+- [[_COMMUNITY_AddCotizacion1783043552605|AddCotizacion1783043552605]]
+- [[_COMMUNITY_AddMovimientoInventario1783051968531|AddMovimientoInventario1783051968531]]
+- [[_COMMUNITY_AddEsAseguradoraToCliente1783268122550|AddEsAseguradoraToCliente1783268122550]]
+- [[_COMMUNITY_EnumCotizacionEstado1783658017852|EnumCotizacionEstado1783658017852]]
+- [[_COMMUNITY_EnumOrdenTrabajoEstadoYAsignaciones1783703270455|EnumOrdenTrabajoEstadoYAsignaciones1783703270455]]
+- [[_COMMUNITY_EnumFacturaEstado1783799540998|EnumFacturaEstado1783799540998]]
 
 ## God Nodes (most connected - your core abstractions)
-1. `Informe Técnico Comprobante Fiscal Electrónico v1.0` - 39 edges
-2. `useDataStore` - 28 edges
-3. `Proceso de Certificación para ser Emisor Electrónico` - 26 edges
-4. `Descripción Técnica Servicios DGII` - 24 edges
-5. `Formato Comprobante Fiscal Electrónico (e-CF) V1.0` - 23 edges
-6. `CotizacionService` - 22 edges
-7. `FacturaService` - 22 edges
-8. `compilerOptions` - 22 edges
-9. `Comprobante Fiscal Electrónico (e-CF)` - 22 edges
-10. `Instructivo de Contingencia de Facturación Electrónica` - 20 edges
+1. `useApiList()` - 43 edges
+2. `Informe Técnico Comprobante Fiscal Electrónico v1.0` - 39 edges
+3. `Button()` - 26 edges
+4. `formatCurrency()` - 26 edges
+5. `Proceso de Certificación para ser Emisor Electrónico` - 26 edges
+6. `Descripción Técnica Servicios DGII` - 24 edges
+7. `CotizacionService` - 23 edges
+8. `Formato Comprobante Fiscal Electrónico (e-CF) V1.0` - 23 edges
+9. `FacturaService` - 22 edges
+10. `compilerOptions` - 22 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Firma Digital (XML Signature de e-CF)` --semantically_similar_to--> `Firmado de XML (SHA-256)`  [INFERRED] [semantically similar]
   e-cf/Firmado de e-CF.pdf → e-cf/Descripcion_20Tecnica_20Emisores_20Electronicos.pdf
-- `Histórico de Contingencias` --semantically_similar_to--> `Servicio de Consulta de TrackId e-CF`  [INFERRED] [semantically similar]
-  e-cf/Instructivo-Contingencia-FE.pdf → e-cf/Descripcion_20Tecnica_20Servicios_20DGII.pdf
-- `Mecanismo de 72 Horas para Envío de e-CF Offline` --semantically_similar_to--> `TrackId`  [INFERRED] [semantically similar]
-  e-cf/Instructivo-Contingencia-FE.pdf → e-cf/Descripcion_20Tecnica_20Servicios_20DGII.pdf
-- `Informe Técnico Comprobante Fiscal Electrónico v1.0` --references--> `Decreto No. 254-06 (Reglamento Impresión, Emisión y Entrega de Comprobantes Fiscales)`  [EXTRACTED]
-  e-cf/Informe Técnico e-CF v1.0.pdf → e-cf/Formato Comprobante Fiscal Electrónico (e-CF) V1.0.pdf
-- `Declaración Jurada de Certificación (Paso 13)` --semantically_similar_to--> `Declaración Jurada para la Actualización de Datos de Sociedades`  [INFERRED] [semantically similar]
-  e-cf/Proceso de Certificacion para ser Emisor Electronico.pdf → e-cf/Solicitud_20Usuario_20Administrador_20de_20e-CF.pdf
+- `bootstrap()` --indirect_call--> `AppModule`  [INFERRED]
+  backend/src/main.ts → backend/src/app.module.ts
+- `bootstrap()` --indirect_call--> `CategoriaMaterial`  [INFERRED]
+  backend/src/database/seed.ts → backend/src/categoria-material/entities/categoria-material.entity.ts
+- `bootstrap()` --indirect_call--> `Material`  [INFERRED]
+  backend/src/database/seed.ts → backend/src/material/entities/material.entity.ts
+- `bootstrap()` --indirect_call--> `MovimientoInventarioService`  [INFERRED]
+  backend/src/database/seed.ts → backend/src/movimiento-inventario/movimiento-inventario.service.ts
 
 ## Import Cycles
 - None detected.
@@ -117,15 +135,15 @@
 - **Digital Signature Requirement Across e-CF Response Formats** — e_cf_instructivo_20app_20firma_20digital_app_firma_digital, e_cf_instructivo_20app_20firma_20digital_firma_digital, e_cf_formato_anulaci_n_de_e_ncf_v1_0_firma_digital_anecf, e_cf_formato_20resumen_20factura_20consumo_20electr_c3_b3nica_20v1_0_firma_digital_rfce, e_cf_formato_aprobaci_n_comercial_v1_0_firma_digital_acecf, e_cf_formato_acuse_de_recibo_v_1_0_firma_digital_arecf [INFERRED 0.85]
 - **Core Actors in the e-CF Ecosystem (Emisor, Receptor, DGII)** — e_cf_proceso_certificacion_emisorelectronico_proveedor_servicios_fecertificado_emisor_electronico, e_cf_proceso_certificacion_emisorelectronico_proveedor_servicios_fecertificado_receptor_electronico, e_cf_proceso_certificacion_emisorelectronico_proveedor_servicios_fecertificado_impuestos_internos_dgii [INFERRED 0.85]
 
-## Communities (60 total, 17 thin omitted)
+## Communities (78 total, 23 thin omitted)
 
 ### Community 0 - "Client & Vehicle Management"
-Cohesion: 0.07
-Nodes (19): CurrentUser, JwtPayload, CreateMovimientoInventarioDto, MovimientoInventario, MovimientoInventarioController, MOVIMIENTO_RELATIONS, MovimientoInventarioService, CreateOrdenTrabajoConsumoDto (+11 more)
+Cohesion: 0.39
+Nodes (7): CreateOrdenTrabajoAsignacionDto, CreateOrdenTrabajoConsumoDto, CreateOrdenTrabajoDto, UpdateOrdenTrabajoConsumoDto, UpdateOrdenTrabajoDto, EstadoOrdenTrabajo, ORDEN_TRABAJO_RELATIONS
 
 ### Community 1 - "Authentication & User Roles"
 Cohesion: 0.07
-Nodes (17): AuthController, AuthModule, AuthService, TokenPair, LoginDto, JwtStrategy, CreateRolDto, UpdateRolDto (+9 more)
+Nodes (14): AuthController, AuthService, TokenPair, LoginDto, CreateRolDto, UpdateRolDto, Rol, RolController (+6 more)
 
 ### Community 2 - "DGII Web Services & Contingency"
 Cohesion: 0.08
@@ -148,20 +166,20 @@ Cohesion: 0.05
 Nodes (48): Acuse de Recibo (formato XML), DGII (Dirección General de Impuestos Internos), e-CF / e-NCF (Comprobante Fiscal Electrónico), Emisor Electrónico, Estándar de Nombre de Archivos XML, Firmado de XML (SHA-256), Receptor Electrónico, Restricciones de Contenido y Caracteres en los XML (+40 more)
 
 ### Community 7 - "Work Orders & JWT Auth"
-Cohesion: 0.10
-Nodes (30): Button(), ButtonProps, variantClasses, Field(), FormError(), LineItemsEditor(), LineItemsEditorProps, schema (+22 more)
+Cohesion: 0.13
+Nodes (20): emptyLinea(), LineaItemDraft, LineItemsEditor(), LineItemsEditorProps, QuoteForm(), QuoteFormProps, QuoteFormSubmitPayload, QuoteFormValues (+12 more)
 
 ### Community 8 - "Inventory Movements & Suppliers"
 Cohesion: 0.06
 Nodes (35): dependencies, axios, react, react-dom, react-router-dom, tailwindcss, @tailwindcss/vite, zod (+27 more)
 
 ### Community 9 - "Quotes (Cotizaciones)"
-Cohesion: 0.14
-Nodes (7): CotizacionController, COTIZACION_RELATIONS, CotizacionService, CreateCotizacionDto, CreateCotizacionLineaDto, UpdateCotizacionDto, UpdateCotizacionLineaDto
+Cohesion: 0.13
+Nodes (10): CotizacionController, COTIZACION_RELATIONS, CotizacionService, CreateCotizacionDto, CreateCotizacionLineaDto, UpdateCotizacionDto, UpdateCotizacionLineaDto, Cotizacion (+2 more)
 
 ### Community 10 - "Backend Dev Dependencies"
-Cohesion: 0.50
-Nodes (6): Cliente, Cotizacion, Factura, OrdenTrabajoConsumo, OrdenTrabajo, Vehiculo
+Cohesion: 0.47
+Nodes (3): OrdenTrabajoAsignacion, OrdenTrabajoConsumo, OrdenTrabajo
 
 ### Community 11 - "e-CF Technical Norms & Services"
 Cohesion: 0.10
@@ -169,15 +187,15 @@ Nodes (23): Aprobación o Rechazo Comercial, Código de Seguridad, Código Tribu
 
 ### Community 12 - "Insurance Companies (Aseguradora)"
 Cohesion: 0.07
-Nodes (13): AseguradoraController, AseguradoraService, CreateAseguradoraDto, UpdateAseguradoraDto, Aseguradora, ClienteController, ClienteService, CreateClienteDto (+5 more)
+Nodes (15): AseguradoraController, AseguradoraService, CreateAseguradoraDto, UpdateAseguradoraDto, Aseguradora, ClienteController, ClienteService, CreateClienteDto (+7 more)
 
 ### Community 13 - "Vehicle Parts (Pieza)"
-Cohesion: 0.11
-Nodes (10): CreateFacturaDto, CreateFacturaFromCotizacionDto, CreateFacturaLineaDto, RegistrarPagoDto, UpdateFacturaDto, UpdateFacturaLineaDto, FacturaController, ESTADOS_BLOQUEADOS (+2 more)
+Cohesion: 0.10
+Nodes (13): CreateFacturaDto, CreateFacturaFromCotizacionDto, CreateFacturaLineaDto, RegistrarPagoDto, UpdateFacturaDto, UpdateFacturaLineaDto, Factura, FacturaLinea (+5 more)
 
 ### Community 14 - "Services Catalog (Servicio)"
-Cohesion: 0.17
-Nodes (6): FacturaLinea, CreateServicioDto, UpdateServicioDto, Servicio, ServicioController, ServicioService
+Cohesion: 0.19
+Nodes (5): CreateServicioDto, UpdateServicioDto, Servicio, ServicioController, ServicioService
 
 ### Community 16 - "TypeScript Compiler Config"
 Cohesion: 0.09
@@ -196,11 +214,11 @@ Cohesion: 0.11
 Nodes (19): dependencies, bcryptjs, class-transformer, class-validator, cookie-parser, @nestjs/common, @nestjs/config, @nestjs/core (+11 more)
 
 ### Community 20 - "Backend NPM Scripts"
-Cohesion: 0.12
-Nodes (17): scripts, build, format, lint, migration:generate, migration:revert, migration:run, start (+9 more)
+Cohesion: 0.11
+Nodes (18): scripts, build, format, lint, migration:generate, migration:revert, migration:run, seed (+10 more)
 
 ### Community 21 - "Company Profile (Empresa)"
-Cohesion: 0.28
+Cohesion: 0.26
 Nodes (5): UpsertEmpresaDto, EmpresaController, EmpresaModule, EmpresaService, Empresa
 
 ### Community 22 - "Admin User Request for e-CF"
@@ -208,12 +226,12 @@ Cohesion: 0.18
 Nodes (15): Centro de Asistencia Presencial (CAP), Certificado Digital para Procedimiento Tributario, Declaración Jurada para la Actualización de Datos de Sociedades, Declaración Jurada de Certificación (Paso 13), Digifirma (Entidad de Certificación), Solicitud Usuario Administrador de e-CF, Firma Digital, Signatario o Firmante de e-CF (+7 more)
 
 ### Community 23 - "App Bootstrap & Auth Guards"
-Cohesion: 0.19
-Nodes (17): AppModule, AseguradoraModule, CategoriaMaterialModule, ClienteModule, CotizacionModule, dataSourceOptions, FacturaModule, bootstrap() (+9 more)
+Cohesion: 0.31
+Nodes (11): AseguradoraModule, ClienteModule, CotizacionModule, FacturaModule, MaterialModule, MovimientoInventarioModule, OrdenTrabajoModule, PiezaModule (+3 more)
 
 ### Community 24 - "Jest Test Config"
-Cohesion: 0.36
-Nodes (3): AppController, AppService, Public()
+Cohesion: 0.22
+Nodes (4): AppController, AppService, Public(), JwtAuthGuard
 
 ### Community 25 - "NestJS CLI Config"
 Cohesion: 0.29
@@ -224,16 +242,16 @@ Cohesion: 0.29
 Nodes (6): author, description, license, name, private, version
 
 ### Community 27 - "Agent Governance Rules"
-Cohesion: 0.11
+Cohesion: 0.10
 Nodes (10): CategoriaMaterialController, CategoriaMaterialService, CreateCategoriaMaterialDto, UpdateCategoriaMaterialDto, CategoriaMaterial, CreateMaterialDto, UpdateMaterialDto, Material (+2 more)
 
 ### Community 32 - "TecnicoService"
-Cohesion: 0.21
+Cohesion: 0.20
 Nodes (5): CreateTecnicoDto, UpdateTecnicoDto, Tecnico, TecnicoController, TecnicoService
 
 ### Community 33 - "Invoice.tsx"
-Cohesion: 0.21
-Nodes (14): DocumentHeader(), DocumentHeaderProps, LineItemsTable(), Field, PartyCard(), PartyCardProps, TotalsCard(), TotalsCardProps (+6 more)
+Cohesion: 0.11
+Nodes (35): App(), DocumentHeader(), DocumentHeaderProps, LineItemRow, LineItemsTable(), Field, PartyCard(), PartyCardProps (+27 more)
 
 ### Community 35 - "Consumer Invoice Summary Rules"
 Cohesion: 0.67
@@ -249,55 +267,103 @@ Nodes (9): jest, collectCoverageFrom, coverageDirectory, moduleFileExtensions, r
 
 ### Community 41 - "Frontend Entry Point"
 Cohesion: 0.10
-Nodes (24): Layout(), ThemeToggle(), Topbar(), AuthProvider(), getInitialTheme(), Theme, ThemeContext, ThemeContextValue (+16 more)
+Nodes (24): Layout(), RequireAdmin(), Topbar(), ThemeToggle(), AuthProvider(), getInitialTheme(), Theme, ThemeContext (+16 more)
 
 ### Community 42 - "compilerOptions"
 Cohesion: 0.10
 Nodes (19): compilerOptions, allowArbitraryExtensions, allowImportingTsExtensions, erasableSyntaxOnly, jsx, lib, module, moduleDetection (+11 more)
+
+### Community 43 - "InvoiceList.tsx"
+Cohesion: 0.15
+Nodes (7): CurrentUser, JwtStrategy, CreateMovimientoInventarioDto, MovimientoInventario, MovimientoInventarioController, MOVIMIENTO_RELATIONS, MovimientoInventarioService
 
 ### Community 44 - "compilerOptions"
 Cohesion: 0.12
 Nodes (16): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection, noEmit, noFallthroughCasesInSwitch (+8 more)
 
 ### Community 45 - "app.controller.ts"
-Cohesion: 0.19
-Nodes (6): CotizacionLinea, CreatePiezaDto, UpdatePiezaDto, Pieza, PiezaController, PiezaService
+Cohesion: 0.20
+Nodes (5): CreatePiezaDto, UpdatePiezaDto, Pieza, PiezaController, PiezaService
 
 ### Community 46 - "icons.tsx"
-Cohesion: 0.17
-Nodes (20): base, IconCustomers(), IconInventory(), IconInvoice(), IconPanel(), IconPin(), IconProps, IconQuote() (+12 more)
+Cohesion: 0.16
+Nodes (22): Sidebar(), base, IconCatalog(), IconClose(), IconCustomers(), IconInventory(), IconInvoice(), IconPanel() (+14 more)
 
 ### Community 47 - "React + TypeScript + Vite"
 Cohesion: 0.50
 Nodes (3): Expanding the ESLint configuration, React Compiler, React + TypeScript + Vite
 
+### Community 50 - "AddInventoryCatalog1783024534404"
+Cohesion: 0.24
+Nodes (4): AuthModule, ProveedorModule, RolModule, UsuarioModule
+
 ### Community 51 - "mockData.ts"
-Cohesion: 0.17
-Nodes (19): Cliente, ClienteDirectorio, clientes, Cotizacion, cotizaciones, EstadoCotizacion, EstadoFactura, EstadoOrdenTrabajo (+11 more)
+Cohesion: 0.15
+Nodes (12): AseguradoraModal(), CatalogoColumn, CatalogoSection(), CatalogoSectionProps, PiezaModal(), ServicioModal(), IconTrash(), Catalogos() (+4 more)
 
 ### Community 52 - "useDataStore"
+Cohesion: 0.13
+Nodes (20): EditWorkOrderModal(), NewClientModal(), NewMaterialModal(), schema, NewMovimientoModal(), NewWorkOrderModal(), ReasignarTecnicoModal(), IconSearch() (+12 more)
+
+### Community 54 - "ProveedorService"
+Cohesion: 0.20
+Nodes (5): CreateProveedorDto, UpdateProveedorDto, Proveedor, ProveedorController, ProveedorService
+
+### Community 55 - "index.ts"
+Cohesion: 0.24
+Nodes (8): CategoriaMaterial, categoriaMaterialService, CreateCategoriaMaterialDto, UpdateCategoriaMaterialDto, CreateMaterialDto, Material, UpdateMaterialDto, OrdenTrabajoConsumo
+
+### Community 56 - "cotizacion.ts"
+Cohesion: 0.18
+Nodes (10): createCrudService(), CreatePiezaDto, UpdatePiezaDto, CreateProveedorDto, proveedorService, UpdateProveedorDto, CreateServicioDto, UpdateServicioDto (+2 more)
+
+### Community 58 - "crud.ts"
+Cohesion: 0.20
+Nodes (11): CreateMovimientoInventarioDto, MovimientoInventario, Proveedor, CreateRolDto, Rol, rolService, UpdateRolDto, CreateUsuarioDto (+3 more)
+
+### Community 59 - "factura.ts"
 Cohesion: 0.17
-Nodes (22): App(), NewClientModal(), NewWorkOrderModal(), IconPlus(), IconSearch(), estadoMap, StampBadge(), StampBadgeProps (+14 more)
+Nodes (17): EditWorkOrderModalProps, NewVehiculoModalProps, RegistrarPagoModalProps, VehiculoPickerProps, Cliente, Cotizacion, CreateFacturaDto, CreateFacturaFromCotizacionDto (+9 more)
+
+### Community 60 - "ordenTrabajo.ts"
+Cohesion: 0.20
+Nodes (10): EstadoMenuProps, CreateOrdenTrabajoAsignacionDto, CreateOrdenTrabajoConsumoDto, CreateOrdenTrabajoDto, EstadoOrdenTrabajo, ESTADOS_ORDEN_TRABAJO, OrdenTrabajoAsignacion, UpdateOrdenTrabajoConsumoDto (+2 more)
+
+### Community 61 - "api.ts"
+Cohesion: 0.21
+Nodes (7): EMPRESA_POR_DEFECTO, api, rawApi, RetryableConfig, Empresa, empresaService, UpsertEmpresaDto
+
+### Community 62 - "vehiculo.ts"
+Cohesion: 0.09
+Nodes (41): AseguradoraModalProps, schema, schema, schema, schema, Field(), FormError(), schema (+33 more)
+
+### Community 63 - "AppModule"
+Cohesion: 0.20
+Nodes (12): AppModule, bootstrap(), MATERIALES, MaterialSeed, PIEZAS, seedAdminUser(), seedMateriales(), seedPiezas() (+4 more)
+
+### Community 71 - "Pieza"
+Cohesion: 0.40
+Nodes (6): PiezaModalProps, ServicioModalProps, CotizacionLinea, FacturaLinea, Pieza, Servicio
 
 ## Knowledge Gaps
-- **317 isolated node(s):** `$schema`, `collection`, `sourceRoot`, `deleteOutDir`, `plugins` (+312 more)
+- **380 isolated node(s):** `$schema`, `collection`, `sourceRoot`, `deleteOutDir`, `plugins` (+375 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **17 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **23 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `typeorm` connect `Backend Runtime Dependencies` to `PiezaService`?**
+  _High betweenness centrality (0.063) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `Backend Runtime Dependencies` to `Package Metadata`?**
-  _High betweenness centrality (0.075) - this node is a cross-community bridge._
-- **Why does `typeorm` connect `Backend Runtime Dependencies` to `App Bootstrap & Auth Guards`?**
-  _High betweenness centrality (0.075) - this node is a cross-community bridge._
-- **Why does `devDependencies` connect `Material & Inventory Catalog` to `Package Metadata`?**
-  _High betweenness centrality (0.035) - this node is a cross-community bridge._
+  _High betweenness centrality (0.063) - this node is a cross-community bridge._
+- **Why does `api` connect `api.ts` to `Invoice.tsx`, `Frontend Entry Point`, `cotizacion.ts`, `crud.ts`, `factura.ts`, `ordenTrabajo.ts`?**
+  _High betweenness centrality (0.055) - this node is a cross-community bridge._
 - **What connects `$schema`, `collection`, `sourceRoot` to the rest of the system?**
-  _320 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `Client & Vehicle Management` be split into smaller, more focused modules?**
-  _Cohesion score 0.06631578947368422 - nodes in this community are weakly interconnected._
+  _383 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Authentication & User Roles` be split into smaller, more focused modules?**
-  _Cohesion score 0.06729264475743349 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06830601092896176 - nodes in this community are weakly interconnected._
 - **Should `DGII Web Services & Contingency` be split into smaller, more focused modules?**
   _Cohesion score 0.07857142857142857 - nodes in this community are weakly interconnected._
+- **Should `Free Invoicing Tool (Facturador Gratuito)` be split into smaller, more focused modules?**
+  _Cohesion score 0.05185185185185185 - nodes in this community are weakly interconnected._
