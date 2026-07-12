@@ -13,6 +13,7 @@ import { Vehiculo } from '../../vehiculo/entities/vehiculo.entity';
 import { Cotizacion } from '../../cotizacion/entities/cotizacion.entity';
 import { OrdenTrabajo } from '../../orden-trabajo/entities/orden-trabajo.entity';
 import { FacturaLinea } from './factura-linea.entity';
+import { EstadoFactura } from '../enums/estado-factura.enum';
 
 @Entity('factura')
 export class Factura {
@@ -44,8 +45,12 @@ export class Factura {
   @Column({ type: 'varchar', unique: true })
   numero: string;
 
-  @Column({ type: 'varchar', default: 'pendiente' })
-  estado: string;
+  @Column({
+    type: 'enum',
+    enum: EstadoFactura,
+    default: EstadoFactura.PENDIENTE,
+  })
+  estado: EstadoFactura;
 
   @Column({ type: 'date', name: 'fecha_emision' })
   fechaEmision: string;

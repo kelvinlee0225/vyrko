@@ -13,6 +13,7 @@ import { CreateOrdenTrabajoDto } from './dto/create-orden-trabajo.dto';
 import { UpdateOrdenTrabajoDto } from './dto/update-orden-trabajo.dto';
 import { CreateOrdenTrabajoConsumoDto } from './dto/create-orden-trabajo-consumo.dto';
 import { UpdateOrdenTrabajoConsumoDto } from './dto/update-orden-trabajo-consumo.dto';
+import { CreateOrdenTrabajoAsignacionDto } from './dto/create-orden-trabajo-asignacion.dto';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 
@@ -50,6 +51,14 @@ export class OrdenTrabajoController {
   @Delete(':id')
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.ordenTrabajoService.remove(id, user.sub);
+  }
+
+  @Post(':id/asignaciones')
+  reasignarTecnico(
+    @Param('id') id: string,
+    @Body() createAsignacionDto: CreateOrdenTrabajoAsignacionDto,
+  ) {
+    return this.ordenTrabajoService.reasignarTecnico(id, createAsignacionDto);
   }
 
   @Post(':id/consumos')

@@ -1,10 +1,12 @@
 import {
   IsDateString,
+  IsEnum,
   IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
+import { EstadoFactura } from '../enums/estado-factura.enum';
 
 export class UpdateFacturaDto {
   @IsUUID()
@@ -23,9 +25,9 @@ export class UpdateFacturaDto {
   @IsOptional()
   ordenTrabajoId?: string;
 
-  @IsString()
+  @IsEnum(EstadoFactura)
   @IsOptional()
-  estado?: string;
+  estado?: EstadoFactura;
 
   @IsDateString()
   @IsOptional()

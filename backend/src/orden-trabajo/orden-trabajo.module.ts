@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrdenTrabajo } from './entities/orden-trabajo.entity';
 import { OrdenTrabajoConsumo } from './entities/orden-trabajo-consumo.entity';
+import { OrdenTrabajoAsignacion } from './entities/orden-trabajo-asignacion.entity';
 import { OrdenTrabajoService } from './orden-trabajo.service';
 import { OrdenTrabajoController } from './orden-trabajo.controller';
 import { CotizacionModule } from '../cotizacion/cotizacion.module';
@@ -12,7 +13,11 @@ import { MovimientoInventarioModule } from '../movimiento-inventario/movimiento-
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([OrdenTrabajo, OrdenTrabajoConsumo]),
+    TypeOrmModule.forFeature([
+      OrdenTrabajo,
+      OrdenTrabajoConsumo,
+      OrdenTrabajoAsignacion,
+    ]),
     CotizacionModule,
     VehiculoModule,
     TecnicoModule,

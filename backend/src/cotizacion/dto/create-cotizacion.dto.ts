@@ -3,6 +3,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsDateString,
+  IsEnum,
   IsNumberString,
   IsOptional,
   IsString,
@@ -10,6 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateCotizacionLineaDto } from './create-cotizacion-linea.dto';
+import { EstadoCotizacion } from '../enums/estado-cotizacion.enum';
 
 export class CreateCotizacionDto {
   @IsUUID()
@@ -18,9 +20,9 @@ export class CreateCotizacionDto {
   @IsUUID()
   vehiculoId: string;
 
-  @IsString()
+  @IsEnum(EstadoCotizacion)
   @IsOptional()
-  estado?: string;
+  estado?: EstadoCotizacion;
 
   @IsDateString()
   fechaValidez: string;

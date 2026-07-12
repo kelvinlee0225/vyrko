@@ -11,6 +11,7 @@ import {
 import { Cliente } from '../../cliente/entities/cliente.entity';
 import { Vehiculo } from '../../vehiculo/entities/vehiculo.entity';
 import { CotizacionLinea } from './cotizacion-linea.entity';
+import { EstadoCotizacion } from '../enums/estado-cotizacion.enum';
 
 @Entity('cotizacion')
 export class Cotizacion {
@@ -34,8 +35,12 @@ export class Cotizacion {
   @Column({ type: 'varchar', unique: true })
   numero: string;
 
-  @Column({ type: 'varchar', default: 'pendiente' })
-  estado: string;
+  @Column({
+    type: 'enum',
+    enum: EstadoCotizacion,
+    default: EstadoCotizacion.BORRADOR,
+  })
+  estado: EstadoCotizacion;
 
   @Column({ type: 'date', name: 'fecha_validez' })
   fechaValidez: string;

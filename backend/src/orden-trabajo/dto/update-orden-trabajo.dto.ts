@@ -1,4 +1,11 @@
-import { IsDateString, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
+import { EstadoOrdenTrabajo } from '../enums/estado-orden-trabajo.enum';
 
 export class UpdateOrdenTrabajoDto {
   @IsUUID()
@@ -13,9 +20,9 @@ export class UpdateOrdenTrabajoDto {
   @IsOptional()
   tecnicoId?: string;
 
-  @IsString()
+  @IsEnum(EstadoOrdenTrabajo)
   @IsOptional()
-  estado?: string;
+  estado?: EstadoOrdenTrabajo;
 
   @IsDateString()
   @IsOptional()

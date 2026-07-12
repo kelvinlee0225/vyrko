@@ -12,6 +12,8 @@ import { Cotizacion } from '../../cotizacion/entities/cotizacion.entity';
 import { Vehiculo } from '../../vehiculo/entities/vehiculo.entity';
 import { Tecnico } from '../../tecnico/entities/tecnico.entity';
 import { OrdenTrabajoConsumo } from './orden-trabajo-consumo.entity';
+import { OrdenTrabajoAsignacion } from './orden-trabajo-asignacion.entity';
+import { EstadoOrdenTrabajo } from '../enums/estado-orden-trabajo.enum';
 
 @Entity('orden_trabajo')
 export class OrdenTrabajo {
@@ -36,8 +38,12 @@ export class OrdenTrabajo {
   @JoinColumn({ name: 'tecnico_id' })
   tecnico: Tecnico;
 
-  @Column({ type: 'varchar', default: 'recibido' })
-  estado: string;
+  @Column({
+    type: 'enum',
+    enum: EstadoOrdenTrabajo,
+    default: EstadoOrdenTrabajo.PENDIENTE,
+  })
+  estado: EstadoOrdenTrabajo;
 
   @Column({ type: 'date', name: 'fecha_entrada' })
   fechaEntrada: string;
@@ -53,4 +59,10 @@ export class OrdenTrabajo {
 
   @OneToMany(() => OrdenTrabajoConsumo, (consumo) => consumo.ordenTrabajo)
   consumos: OrdenTrabajoConsumo[];
+
+  @OneToMany(
+    () => OrdenTrabajoAsignacion,
+    (asignacion) => asignacion.ordenTrabajo,
+  )
+  asignaciones: OrdenTrabajoAsignacion[];
 }

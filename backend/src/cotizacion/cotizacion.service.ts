@@ -11,6 +11,7 @@ import { ClienteService } from '../cliente/cliente.service';
 import { VehiculoService } from '../vehiculo/vehiculo.service';
 import { ServicioService } from '../servicio/servicio.service';
 import { PiezaService } from '../pieza/pieza.service';
+import { EstadoCotizacion } from './enums/estado-cotizacion.enum';
 
 const COTIZACION_RELATIONS = {
   cliente: true,
@@ -44,7 +45,7 @@ export class CotizacionService {
       const cotizacion = await manager.save(
         manager.create(Cotizacion, {
           ...rest,
-          estado: rest.estado ?? 'pendiente',
+          estado: rest.estado ?? EstadoCotizacion.BORRADOR,
           numero,
           cliente,
           vehiculo,
@@ -68,7 +69,10 @@ export class CotizacionService {
     const cotizaciones = await this.cotizacionRepository.find({
       relations: COTIZACION_RELATIONS,
     });
-    return cotizaciones.map((cotizacion) => ({
+    const sincronizadas = await Promise.all(
+      cotizaciones.map((cotizacion) => this.sincronizarVencimiento(cotizacion)),
+    );
+    return sincronizadas.map((cotizacion) => ({
       ...cotizacion,
       ...this.computeTotales(cotizacion),
     }));
@@ -87,12 +91,31 @@ export class CotizacionService {
     if (!cotizacion) {
       throw new NotFoundException(`Cotizacion ${id} no encontrada`);
     }
+    return this.sincronizarVencimiento(cotizacion);
+  }
+
+  /**
+   * There's no scheduler in this app, so expiry is detected lazily: any
+   * cotización read past its fechaValidez that isn't already VENCIDA gets
+   * flipped and persisted here, regardless of BORRADOR/ENTREGADA.
+   */
+  private async sincronizarVencimiento(
+    cotizacion: Cotizacion,
+  ): Promise<Cotizacion> {
+    const hoy = new Date().toISOString().slice(0, 10);
+    if (
+      cotizacion.estado !== EstadoCotizacion.VENCIDA &&
+      cotizacion.fechaValidez < hoy
+    ) {
+      cotizacion.estado = EstadoCotizacion.VENCIDA;
+      await this.cotizacionRepository.save(cotizacion);
+    }
     return cotizacion;
   }
 
   async update(id: string, updateCotizacionDto: UpdateCotizacionDto) {
     const cotizacion = await this.findOne(id);
-    const { clienteId, vehiculoId, ...rest } = updateCotizacionDto;
+    const { clienteId, vehiculoId, lineas, ...rest } = updateCotizacionDto;
     if (clienteId) {
       cotizacion.cliente = await this.clienteService.findOne(clienteId);
     }
@@ -100,7 +123,23 @@ export class CotizacionService {
       cotizacion.vehiculo = await this.vehiculoService.findOne(vehiculoId);
     }
     Object.assign(cotizacion, rest);
-    await this.cotizacionRepository.save(cotizacion);
+
+    if (lineas) {
+      const lineasConRelaciones = await this.resolveLineas(lineas);
+      await this.dataSource.transaction(async (manager) => {
+        await manager.save(cotizacion);
+        await manager.delete(CotizacionLinea, { cotizacion: { id } });
+        await manager.save(
+          CotizacionLinea,
+          lineasConRelaciones.map((linea) =>
+            manager.create(CotizacionLinea, { ...linea, cotizacion }),
+          ),
+        );
+      });
+    } else {
+      await this.cotizacionRepository.save(cotizacion);
+    }
+
     return this.findOneDetail(id);
   }
 

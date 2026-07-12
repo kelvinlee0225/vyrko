@@ -19,6 +19,7 @@ import { CotizacionService } from '../cotizacion/cotizacion.service';
 import { OrdenTrabajoService } from '../orden-trabajo/orden-trabajo.service';
 import { ServicioService } from '../servicio/servicio.service';
 import { PiezaService } from '../pieza/pieza.service';
+import { EstadoFactura } from './enums/estado-factura.enum';
 
 const FACTURA_RELATIONS = {
   cliente: true,
@@ -28,7 +29,10 @@ const FACTURA_RELATIONS = {
   lineas: { servicio: true, pieza: true },
 } as const;
 
-const ESTADOS_BLOQUEADOS = ['pagada', 'anulada'];
+const ESTADOS_BLOQUEADOS: EstadoFactura[] = [
+  EstadoFactura.PAGADA,
+  EstadoFactura.ANULADA,
+];
 
 @Injectable()
 export class FacturaService {
@@ -73,7 +77,7 @@ export class FacturaService {
       const factura = await manager.save(
         manager.create(Factura, {
           ...rest,
-          estado: rest.estado ?? 'pendiente',
+          estado: rest.estado ?? EstadoFactura.PENDIENTE,
           numero,
           cliente,
           vehiculo,
@@ -111,7 +115,7 @@ export class FacturaService {
       const factura = await manager.save(
         manager.create(Factura, {
           numero,
-          estado: 'pendiente',
+          estado: EstadoFactura.PENDIENTE,
           fechaEmision,
           fechaVencimiento: dto.fechaVencimiento ?? null,
           notas: dto.notas ?? null,
@@ -242,7 +246,7 @@ export class FacturaService {
 
   async registrarPago(id: string, registrarPagoDto: RegistrarPagoDto) {
     const factura = await this.findOne(id);
-    if (factura.estado === 'anulada') {
+    if (factura.estado === EstadoFactura.ANULADA) {
       throw new BadRequestException(
         `No se puede registrar un pago sobre la factura ${id} porque esta anulada`,
       );
@@ -257,7 +261,9 @@ export class FacturaService {
     factura.fechaPago =
       registrarPagoDto.fechaPago ?? new Date().toISOString().slice(0, 10);
     factura.estado =
-      montoPagado >= parseFloat(total) ? 'pagada' : 'pago_parcial';
+      montoPagado >= parseFloat(total)
+        ? EstadoFactura.PAGADA
+        : EstadoFactura.PAGO_PARCIAL;
 
     await this.facturaRepository.save(factura);
     return this.findOneDetail(id);
@@ -270,7 +276,7 @@ export class FacturaService {
         `No se puede anular la factura ${id} porque ya tiene pagos registrados`,
       );
     }
-    factura.estado = 'anulada';
+    factura.estado = EstadoFactura.ANULADA;
     await this.facturaRepository.save(factura);
     return this.findOneDetail(id);
   }

@@ -3,6 +3,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsDateString,
+  IsEnum,
   IsNumberString,
   IsOptional,
   IsString,
@@ -10,6 +11,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CreateFacturaLineaDto } from './create-factura-linea.dto';
+import { EstadoFactura } from '../enums/estado-factura.enum';
 
 export class CreateFacturaDto {
   @IsUUID()
@@ -27,9 +29,9 @@ export class CreateFacturaDto {
   @IsOptional()
   ordenTrabajoId?: string;
 
-  @IsString()
+  @IsEnum(EstadoFactura)
   @IsOptional()
-  estado?: string;
+  estado?: EstadoFactura;
 
   @IsDateString()
   fechaEmision: string;

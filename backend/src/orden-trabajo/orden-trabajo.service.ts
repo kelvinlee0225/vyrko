@@ -3,10 +3,13 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { OrdenTrabajo } from './entities/orden-trabajo.entity';
 import { OrdenTrabajoConsumo } from './entities/orden-trabajo-consumo.entity';
+import { OrdenTrabajoAsignacion } from './entities/orden-trabajo-asignacion.entity';
+import { EstadoOrdenTrabajo } from './enums/estado-orden-trabajo.enum';
 import { CreateOrdenTrabajoDto } from './dto/create-orden-trabajo.dto';
 import { UpdateOrdenTrabajoDto } from './dto/update-orden-trabajo.dto';
 import { CreateOrdenTrabajoConsumoDto } from './dto/create-orden-trabajo-consumo.dto';
 import { UpdateOrdenTrabajoConsumoDto } from './dto/update-orden-trabajo-consumo.dto';
+import { CreateOrdenTrabajoAsignacionDto } from './dto/create-orden-trabajo-asignacion.dto';
 import { CotizacionService } from '../cotizacion/cotizacion.service';
 import { VehiculoService } from '../vehiculo/vehiculo.service';
 import { TecnicoService } from '../tecnico/tecnico.service';
@@ -15,9 +18,10 @@ import { MovimientoInventarioService } from '../movimiento-inventario/movimiento
 
 const ORDEN_TRABAJO_RELATIONS = {
   cotizacion: true,
-  vehiculo: true,
+  vehiculo: { cliente: true },
   tecnico: true,
   consumos: { material: true },
+  asignaciones: { tecnico: true },
 } as const;
 
 @Injectable()
@@ -27,6 +31,8 @@ export class OrdenTrabajoService {
     private readonly ordenTrabajoRepository: Repository<OrdenTrabajo>,
     @InjectRepository(OrdenTrabajoConsumo)
     private readonly ordenTrabajoConsumoRepository: Repository<OrdenTrabajoConsumo>,
+    @InjectRepository(OrdenTrabajoAsignacion)
+    private readonly ordenTrabajoAsignacionRepository: Repository<OrdenTrabajoAsignacion>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
     private readonly cotizacionService: CotizacionService,
@@ -54,10 +60,18 @@ export class OrdenTrabajoService {
         const ordenTrabajo = await manager.save(
           manager.create(OrdenTrabajo, {
             ...rest,
-            estado: rest.estado ?? 'recibido',
+            estado: rest.estado ?? EstadoOrdenTrabajo.PENDIENTE,
             cotizacion,
             vehiculo,
             tecnico,
+          }),
+        );
+
+        await manager.save(
+          manager.create(OrdenTrabajoAsignacion, {
+            ordenTrabajo,
+            tecnico,
+            notas: 'Asignación inicial',
           }),
         );
 
@@ -120,11 +134,44 @@ export class OrdenTrabajoService {
     if (vehiculoId) {
       ordenTrabajo.vehiculo = await this.vehiculoService.findOne(vehiculoId);
     }
-    if (tecnicoId) {
+    if (tecnicoId && tecnicoId !== ordenTrabajo.tecnico.id) {
       ordenTrabajo.tecnico = await this.tecnicoService.findOne(tecnicoId);
+      await this.ordenTrabajoAsignacionRepository.save(
+        this.ordenTrabajoAsignacionRepository.create({
+          ordenTrabajo,
+          tecnico: ordenTrabajo.tecnico,
+        }),
+      );
     }
     Object.assign(ordenTrabajo, rest);
-    return this.ordenTrabajoRepository.save(ordenTrabajo);
+    if (
+      rest.estado === EstadoOrdenTrabajo.ENTREGADA &&
+      !ordenTrabajo.fechaEntregaReal
+    ) {
+      ordenTrabajo.fechaEntregaReal = new Date().toISOString().slice(0, 10);
+    }
+    await this.ordenTrabajoRepository.save(ordenTrabajo);
+    return this.findOne(id);
+  }
+
+  async reasignarTecnico(
+    id: string,
+    createAsignacionDto: CreateOrdenTrabajoAsignacionDto,
+  ): Promise<OrdenTrabajo> {
+    const ordenTrabajo = await this.findOne(id);
+    const tecnico = await this.tecnicoService.findOne(
+      createAsignacionDto.tecnicoId,
+    );
+    ordenTrabajo.tecnico = tecnico;
+    await this.ordenTrabajoRepository.save(ordenTrabajo);
+    await this.ordenTrabajoAsignacionRepository.save(
+      this.ordenTrabajoAsignacionRepository.create({
+        ordenTrabajo,
+        tecnico,
+        notas: createAsignacionDto.notas ?? null,
+      }),
+    );
+    return this.findOne(id);
   }
 
   async remove(id: string, usuarioId: string): Promise<void> {

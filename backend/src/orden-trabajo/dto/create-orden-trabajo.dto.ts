@@ -2,12 +2,14 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsDateString,
+  IsEnum,
   IsOptional,
   IsString,
   IsUUID,
   ValidateNested,
 } from 'class-validator';
 import { CreateOrdenTrabajoConsumoDto } from './create-orden-trabajo-consumo.dto';
+import { EstadoOrdenTrabajo } from '../enums/estado-orden-trabajo.enum';
 
 export class CreateOrdenTrabajoDto {
   @IsUUID()
@@ -20,9 +22,9 @@ export class CreateOrdenTrabajoDto {
   @IsUUID()
   tecnicoId: string;
 
-  @IsString()
+  @IsEnum(EstadoOrdenTrabajo)
   @IsOptional()
-  estado?: string;
+  estado?: EstadoOrdenTrabajo;
 
   @IsDateString()
   fechaEntrada: string;
