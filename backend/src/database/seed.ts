@@ -15,6 +15,8 @@ import { MovimientoInventarioService } from '../movimiento-inventario/movimiento
 
 config();
 
+const ROLES = ['admin', 'usuario', 'supervisor', 'contable'];
+
 const SALT_ROUNDS = 10;
 
 const PIEZAS = [
@@ -167,17 +169,21 @@ const MATERIALES: MaterialSeed[] = [
   },
 ];
 
-async function seedRolAdmin(rolRepository: Repository<Rol>): Promise<Rol> {
-  const existente = await rolRepository.findOne({ where: { nombre: 'admin' } });
-  if (existente) {
-    console.log('Rol "admin" ya existe, se omite.');
-    return existente;
+async function seedRoles(
+  rolRepository: Repository<Rol>,
+): Promise<Map<string, Rol>> {
+  const existentes = await rolRepository.find();
+  const porNombre = new Map(existentes.map((r) => [r.nombre, r]));
+  for (const nombre of ROLES) {
+    if (porNombre.has(nombre)) continue;
+    const rol = await rolRepository.save(rolRepository.create({ nombre }));
+    porNombre.set(nombre, rol);
+    console.log(`Rol "${nombre}" creado.`);
   }
-  const rol = await rolRepository.save(
-    rolRepository.create({ nombre: 'admin' }),
-  );
-  console.log('Rol "admin" creado.');
-  return rol;
+  if (porNombre.size === existentes.length) {
+    console.log('Todos los roles ya existen, se omite.');
+  }
+  return porNombre;
 }
 
 async function seedAdminUser(
@@ -331,8 +337,8 @@ async function bootstrap(): Promise<void> {
     );
     const movimientoInventarioService = app.get(MovimientoInventarioService);
 
-    const adminRol = await seedRolAdmin(rolRepository);
-    await seedAdminUser(usuarioRepository, adminRol);
+    const roles = await seedRoles(rolRepository);
+    await seedAdminUser(usuarioRepository, roles.get('admin')!);
     await seedPiezas(piezaRepository);
     await seedServicios(servicioRepository);
     await seedMateriales(

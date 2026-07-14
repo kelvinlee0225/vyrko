@@ -11,6 +11,7 @@ import {
   IconCatalog,
   IconSettings,
   IconPin,
+  IconUser,
 } from './ui/icons'
 import { useApiList } from '../hooks/useApiList'
 import { cotizacionService } from '../services/cotizacion'
@@ -43,7 +44,12 @@ export function Sidebar() {
     { to: '/clientes', label: 'Clientes', icon: IconCustomers },
     { to: '/inventario', label: 'Inventario', icon: IconInventory, badge: String(materialesBajoStock) },
     { to: '/catalogos', label: 'Catálogos', icon: IconCatalog },
-    ...(user?.rol === 'admin' ? [{ to: '/tecnicos', label: 'Técnicos', icon: IconWrench }] : []),
+    ...(user?.rol === 'admin'
+      ? [
+          { to: '/tecnicos', label: 'Técnicos', icon: IconWrench },
+          { to: '/usuarios', label: 'Usuarios', icon: IconUser },
+        ]
+      : []),
   ]
 
   const itemClass = (extra = '') =>

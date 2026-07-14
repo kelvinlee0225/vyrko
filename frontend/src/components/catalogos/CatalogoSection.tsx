@@ -21,6 +21,7 @@ interface CatalogoSectionProps<T extends { id: string }> {
   onEdit: (item: T) => void
   onAdd: () => void
   confirmDeleteMessage: (item: T) => string
+  canDelete?: (item: T) => boolean
 }
 
 export function CatalogoSection<T extends { id: string }>({
@@ -36,6 +37,7 @@ export function CatalogoSection<T extends { id: string }>({
   onEdit,
   onAdd,
   confirmDeleteMessage,
+  canDelete,
 }: CatalogoSectionProps<T>) {
   const [actionError, setActionError] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -122,15 +124,17 @@ export function CatalogoSection<T extends { id: string }>({
                     >
                       Editar
                     </button>
-                    <button
-                      type="button"
-                      disabled={deleting}
-                      onClick={() => handleDelete(item)}
-                      aria-label="Eliminar"
-                      className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-muted transition-colors hover:bg-error-soft hover:text-error disabled:opacity-50"
-                    >
-                      <IconTrash size={14} />
-                    </button>
+                    {(!canDelete || canDelete(item)) && (
+                      <button
+                        type="button"
+                        disabled={deleting}
+                        onClick={() => handleDelete(item)}
+                        aria-label="Eliminar"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md text-muted transition-colors hover:bg-error-soft hover:text-error disabled:opacity-50"
+                      >
+                        <IconTrash size={14} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

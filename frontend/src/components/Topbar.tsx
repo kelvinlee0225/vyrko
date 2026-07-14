@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { ThemeToggle } from './ui/ThemeToggle'
 import { IconChevronDown } from './ui/icons'
 import { useAuth } from '../context/useAuth'
@@ -46,6 +47,13 @@ export function Topbar() {
           </button>
           {menuOpen && (
             <div className="absolute right-0 top-full z-10 mt-2 w-44 rounded-md border border-line bg-surface py-1 shadow-lg">
+              <Link
+                to="/perfil"
+                onClick={() => setMenuOpen(false)}
+                className="block w-full px-3 py-2 text-left text-[13px] text-ink no-underline hover:bg-surface-alt"
+              >
+                Editar perfil
+              </Link>
               <button
                 type="button"
                 onClick={logout}

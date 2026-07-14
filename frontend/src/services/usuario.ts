@@ -1,3 +1,4 @@
+import { api } from '../lib/api'
 import { createCrudService } from './crud'
 import type { Rol } from './rol'
 
@@ -21,4 +22,17 @@ export interface CreateUsuarioDto {
 
 export type UpdateUsuarioDto = Partial<CreateUsuarioDto>
 
-export const usuarioService = createCrudService<Usuario, CreateUsuarioDto, UpdateUsuarioDto>('usuarios')
+export interface UpdateProfileDto {
+  nombre?: string
+  username?: string
+  password?: string
+  currentPassword?: string
+}
+
+const crud = createCrudService<Usuario, CreateUsuarioDto, UpdateUsuarioDto>('usuarios')
+
+export const usuarioService = {
+  ...crud,
+  getMe: () => api.get<Usuario>('/usuarios/me').then((r) => r.data),
+  updateMe: (dto: UpdateProfileDto) => api.patch<Usuario>('/usuarios/me', dto).then((r) => r.data),
+}

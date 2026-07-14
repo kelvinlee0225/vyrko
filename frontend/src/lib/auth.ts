@@ -14,7 +14,7 @@ async function fetchCurrentUser(accessToken: string): Promise<CurrentUser> {
   if (!payload) {
     throw new Error('Token invalido')
   }
-  const { data } = await api.get<UsuarioResponse>(`/usuarios/${payload.sub}`)
+  const { data } = await api.get<UsuarioResponse>('/usuarios/me')
   return { id: data.id, nombre: data.nombre, username: data.username, rol: data.rol.nombre }
 }
 

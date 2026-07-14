@@ -162,6 +162,15 @@ export function IconWrench({ size = 20 }: IconProps) {
   )
 }
 
+export function IconUser({ size = 20 }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" {...base}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M4.5 20c0-3.6 3-6.5 7.5-6.5s7.5 2.9 7.5 6.5" />
+    </svg>
+  )
+}
+
 export function IconDownload({ size = 16 }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" {...base}>

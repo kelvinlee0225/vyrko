@@ -15,6 +15,7 @@ interface AuthState {
   setSession: (accessToken: string, user: CurrentUser) => void
   clearSession: () => void
   setLoading: (isLoading: boolean) => void
+  updateUser: (partial: Partial<CurrentUser>) => void
 }
 
 /**
@@ -30,4 +31,5 @@ export const useAuthStore = create<AuthState>((set) => ({
   setSession: (accessToken, user) => set({ accessToken, user }),
   clearSession: () => set({ accessToken: null, user: null }),
   setLoading: (isLoading) => set({ isLoading }),
+  updateUser: (partial) => set((s) => ({ user: s.user ? { ...s.user, ...partial } : s.user })),
 }))

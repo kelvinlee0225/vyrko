@@ -19,6 +19,8 @@ import { MaterialList } from './pages/material/MaterialList'
 import { Material } from './pages/material/Material'
 import { TecnicoList } from './pages/tecnico/TecnicoList'
 import { Catalogos } from './pages/catalogos/Catalogos'
+import { EditProfile } from './pages/profile/EditProfile'
+import { UsersList } from './pages/users/UsersList'
 import { RequireAdmin } from './components/RequireAdmin'
 
 function App() {
@@ -44,11 +46,20 @@ function App() {
               <Route path="inventario" element={<MaterialList />} />
               <Route path="inventario/:id" element={<Material />} />
               <Route path="catalogos" element={<Catalogos />} />
+              <Route path="perfil" element={<EditProfile />} />
               <Route
                 path="tecnicos"
                 element={
                   <RequireAdmin>
                     <TecnicoList />
+                  </RequireAdmin>
+                }
+              />
+              <Route
+                path="usuarios"
+                element={
+                  <RequireAdmin>
+                    <UsersList />
                   </RequireAdmin>
                 }
               />
