@@ -5,9 +5,9 @@
     "semantic_hash": "598cb075410bcd95220ac90bbb60344a"
   },
   "backend/.claude/settings.local.json": {
-    "mtime": 1782868451.2285337,
-    "ast_hash": "41b34caf368f915372fadb46efd00122",
-    "semantic_hash": "41b34caf368f915372fadb46efd00122"
+    "mtime": 1784062180.9171207,
+    "ast_hash": "03be57684b75fb69511f49a6dfb2d3f1",
+    "semantic_hash": ""
   },
   "backend/eslint.config.mjs": {
     "mtime": 1782670874.1182265,
@@ -550,9 +550,9 @@
     "semantic_hash": "1ca8f72acb97f041cecb439af6fb6456"
   },
   "backend/src/usuario/usuario.controller.ts": {
-    "mtime": 1782872377.2777166,
-    "ast_hash": "a1ef3ff253ee2bf7986ce83ff4ae7d7b",
-    "semantic_hash": "a1ef3ff253ee2bf7986ce83ff4ae7d7b"
+    "mtime": 1784048987.4311447,
+    "ast_hash": "33b08a950bcca41a7f4450d9b87818f9",
+    "semantic_hash": ""
   },
   "backend/src/usuario/usuario.module.ts": {
     "mtime": 1782869781.6285863,
@@ -560,9 +560,9 @@
     "semantic_hash": "3431f4951a1b23e5564e781a3453ab40"
   },
   "backend/src/usuario/usuario.service.ts": {
-    "mtime": 1782873498.7622514,
-    "ast_hash": "a851797b6289a850f7d7d551e6691b5e",
-    "semantic_hash": "a851797b6289a850f7d7d551e6691b5e"
+    "mtime": 1784051004.12817,
+    "ast_hash": "1900c02b6995e97e2cbb8209ceeed863",
+    "semantic_hash": ""
   },
   "backend/src/vehiculo/dto/create-vehiculo.dto.ts": {
     "mtime": 1783025358.247587,
@@ -795,8 +795,8 @@
     "semantic_hash": ""
   },
   "frontend/src/App.tsx": {
-    "mtime": 1783819371.8883271,
-    "ast_hash": "9f4140c2c7b6d5cfe1e58efec566d52d",
+    "mtime": 1784045919.638237,
+    "ast_hash": "d0169b6f0b61def7ed11597dc7d424cf",
     "semantic_hash": ""
   },
   "frontend/src/components/Layout.tsx": {
@@ -805,13 +805,13 @@
     "semantic_hash": ""
   },
   "frontend/src/components/Sidebar.tsx": {
-    "mtime": 1783819354.8136513,
-    "ast_hash": "517ce8c326608134e553590e8370f015",
+    "mtime": 1784045927.527552,
+    "ast_hash": "43fe4b4886d72026c67a40c6fe74ba94",
     "semantic_hash": ""
   },
   "frontend/src/components/Topbar.tsx": {
-    "mtime": 1783819355.8287134,
-    "ast_hash": "5d2d0ff4625fc959cff242cbfc5e21a8",
+    "mtime": 1784045939.0721805,
+    "ast_hash": "8a1f11cc90a2a16b05314e0a326567a2",
     "semantic_hash": ""
   },
   "frontend/src/components/document/DocumentHeader.tsx": {
@@ -910,13 +910,13 @@
     "semantic_hash": ""
   },
   "frontend/src/lib/auth.ts": {
-    "mtime": 1783434327.02023,
-    "ast_hash": "c02918a10191c1f1db688c12055290a5",
+    "mtime": 1784045788.5743163,
+    "ast_hash": "e6cd12ca2bfb730ec212b9b5c85563b0",
     "semantic_hash": ""
   },
   "frontend/src/store/authStore.ts": {
-    "mtime": 1783466668.956154,
-    "ast_hash": "a20af277a631f624a7762cbcf7a22fe0",
+    "mtime": 1784045796.9119036,
+    "ast_hash": "5311eb486b85475e46b3a814c4c7b6bf",
     "semantic_hash": ""
   },
   "frontend/src/components/forms/LineItemsEditor.tsx": {
@@ -1035,8 +1035,8 @@
     "semantic_hash": ""
   },
   "frontend/src/services/usuario.ts": {
-    "mtime": 1783454405.0440776,
-    "ast_hash": "f68840a77893425d550c718f71e197f1",
+    "mtime": 1784045782.769241,
+    "ast_hash": "934e52e8cb51fbea81d82e83d2eccab6",
     "semantic_hash": ""
   },
   "frontend/src/services/vehiculo.ts": {
@@ -1075,8 +1075,8 @@
     "semantic_hash": ""
   },
   "backend/src/database/seed.ts": {
-    "mtime": 1783704035.4603746,
-    "ast_hash": "86bc587d8c5188250f7c08b0087b4cd5",
+    "mtime": 1784047032.9288716,
+    "ast_hash": "07ed8ca741fe24e9e4ea4da1180790ca",
     "semantic_hash": ""
   },
   "backend/src/factura/enums/estado-factura.enum.ts": {
@@ -1110,8 +1110,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/catalogos/CatalogoSection.tsx": {
-    "mtime": 1783819333.7126737,
-    "ast_hash": "655bcb2f83fad39d9528a0ebc5f78b50",
+    "mtime": 1784045909.2679276,
+    "ast_hash": "eda3f21e98aac1e3715697a4b6cecd29",
     "semantic_hash": ""
   },
   "frontend/src/components/catalogos/PiezaModal.tsx": {
@@ -1195,8 +1195,8 @@
     "semantic_hash": ""
   },
   "frontend/src/components/ui/icons.tsx": {
-    "mtime": 1783806572.3982043,
-    "ast_hash": "2fcfedf621ab196a88c2c58941bd33ea",
+    "mtime": 1784045806.6376674,
+    "ast_hash": "1be1dcd892389120fe9ca826575783c5",
     "semantic_hash": ""
   },
   "frontend/src/hooks/useApiList.ts": {
@@ -1220,8 +1220,8 @@
     "semantic_hash": ""
   },
   "frontend/src/pages/client/Client.tsx": {
-    "mtime": 1783819318.1408243,
-    "ast_hash": "610115ab432ca0d84b02d12ed99e3048",
+    "mtime": 1784050831.9353535,
+    "ast_hash": "0d918806ca0817549db3fc367b214734",
     "semantic_hash": ""
   },
   "frontend/src/pages/client/ClientList.tsx": {
@@ -1307,6 +1307,36 @@
   "frontend/public/logo-taller-nang-yang.png": {
     "mtime": 1783643404.4624064,
     "ast_hash": "009619ec52a8aa4855de7825645bc898",
+    "semantic_hash": ""
+  },
+  "backend/src/usuario/dto/update-profile.dto.ts": {
+    "mtime": 1784045751.797534,
+    "ast_hash": "6b6a0559adc5d83e507ee7ce11df3e44",
+    "semantic_hash": ""
+  },
+  "frontend/src/components/forms/EditVehiculoModal.tsx": {
+    "mtime": 1784050799.0410593,
+    "ast_hash": "2403a699b0e5ff3bbf461d0509edb859",
+    "semantic_hash": ""
+  },
+  "frontend/src/components/users/UsuarioModal.tsx": {
+    "mtime": 1784049060.5484445,
+    "ast_hash": "627ee618e4a30104071d3d60775f4676",
+    "semantic_hash": ""
+  },
+  "frontend/src/lib/errors.ts": {
+    "mtime": 1784049031.391773,
+    "ast_hash": "cb53c164567705710cc963ecfeaef109",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/profile/EditProfile.tsx": {
+    "mtime": 1784049049.131878,
+    "ast_hash": "c4ede060918b6e5c0b804648ed55b816",
+    "semantic_hash": ""
+  },
+  "frontend/src/pages/users/UsersList.tsx": {
+    "mtime": 1784045894.74927,
+    "ast_hash": "e108f5d8a7cf13bb382f4ec7b1c30296",
     "semantic_hash": ""
   }
 }
