@@ -148,7 +148,7 @@ export function QuoteForm({ heading, description, submitLabel, submittingLabel, 
                 options={clientes.map((c) => ({
                   value: c.id,
                   label: c.nombreRazonSocial,
-                  sublabel: c.cedulaRnc ?? undefined,
+                  sublabel: c.numeroIdentificacion ?? undefined,
                 }))}
               />
             </Field>

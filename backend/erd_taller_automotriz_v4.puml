@@ -34,7 +34,7 @@ entity CLIENTE {
   * updated_at : timestamp
   * nombre_razon_social : varchar
   * tipo_cliente : varchar
-  cedula_rnc : varchar
+  numero_identificacion : varchar
   * telefono : varchar
   correo : varchar
   direccion : varchar

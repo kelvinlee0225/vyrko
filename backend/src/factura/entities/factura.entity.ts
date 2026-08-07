@@ -14,6 +14,7 @@ import { Cotizacion } from '../../cotizacion/entities/cotizacion.entity';
 import { OrdenTrabajo } from '../../orden-trabajo/entities/orden-trabajo.entity';
 import { FacturaLinea } from './factura-linea.entity';
 import { EstadoFactura } from '../enums/estado-factura.enum';
+import { TipoECF } from '../enums/tipo-ecf.enum';
 
 @Entity('factura')
 export class Factura {
@@ -87,4 +88,8 @@ export class Factura {
 
   @OneToMany(() => FacturaLinea, (linea) => linea.factura)
   lineas: FacturaLinea[];
+
+  /** Which e-CF document type this invoice is fiscally classified as; null = not fiscal. */
+  @Column({ type: 'int', name: 'tipo_ecf', nullable: true })
+  tipoECF: TipoECF | null;
 }

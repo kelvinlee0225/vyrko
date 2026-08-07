@@ -17,7 +17,7 @@ export function ClientList() {
     const q = query.trim().toLowerCase()
     if (!q) return clientes
     return clientes.filter((c) =>
-      [c.nombreRazonSocial, c.cedulaRnc ?? '', c.telefono, c.correo ?? ''].some((field) =>
+      [c.nombreRazonSocial, c.numeroIdentificacion ?? '', c.telefono, c.correo ?? ''].some((field) =>
         field.toLowerCase().includes(q),
       ),
     )
@@ -83,7 +83,7 @@ export function ClientList() {
                 </span>
               </span>
               <span className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] text-muted">
-                {c.cedulaRnc ?? '—'}
+                {c.numeroIdentificacion ?? '—'}
               </span>
               <span className="overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] text-muted">
                 {c.telefono}

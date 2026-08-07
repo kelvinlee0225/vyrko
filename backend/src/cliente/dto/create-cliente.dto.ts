@@ -1,11 +1,13 @@
 import {
   IsBoolean,
+  IsEnum,
   IsInt,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
   IsString,
 } from 'class-validator';
+import { TipoIdentificacion } from '../enums/tipo-identificacion.enum';
 
 export class CreateClienteDto {
   @IsString()
@@ -22,7 +24,11 @@ export class CreateClienteDto {
 
   @IsString()
   @IsOptional()
-  cedulaRnc?: string;
+  numeroIdentificacion?: string;
+
+  @IsEnum(TipoIdentificacion)
+  @IsOptional()
+  tipoIdentificacion?: TipoIdentificacion;
 
   @IsString()
   @IsNotEmpty()

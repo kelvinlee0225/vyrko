@@ -7,7 +7,7 @@ export interface Cliente {
   nombreRazonSocial: string
   tipoCliente: string
   esAseguradora: boolean
-  cedulaRnc: string | null
+  numeroIdentificacion: string | null
   telefono: string
   correo: string | null
   direccion: string | null
@@ -19,7 +19,7 @@ export interface CreateClienteDto {
   nombreRazonSocial: string
   tipoCliente: string
   esAseguradora?: boolean
-  cedulaRnc?: string
+  numeroIdentificacion?: string
   telefono: string
   correo?: string
   direccion?: string

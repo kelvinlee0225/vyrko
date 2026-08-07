@@ -114,7 +114,7 @@ export function Quote() {
                 label: 'Tipo',
                 value: c.cliente.esAseguradora ? `${c.cliente.tipoCliente} · Aseguradora` : c.cliente.tipoCliente,
               },
-              { label: 'Cédula / RNC', value: c.cliente.cedulaRnc ?? '—', mono: true },
+              { label: 'Cédula / RNC', value: c.cliente.numeroIdentificacion ?? '—', mono: true },
               { label: 'Teléfono', value: c.cliente.telefono, mono: true },
             ]}
           />

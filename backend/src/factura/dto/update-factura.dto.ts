@@ -7,6 +7,7 @@ import {
   IsUUID,
 } from 'class-validator';
 import { EstadoFactura } from '../enums/estado-factura.enum';
+import { TipoECF } from '../enums/tipo-ecf.enum';
 
 export class UpdateFacturaDto {
   @IsUUID()
@@ -28,6 +29,10 @@ export class UpdateFacturaDto {
   @IsEnum(EstadoFactura)
   @IsOptional()
   estado?: EstadoFactura;
+
+  @IsEnum(TipoECF)
+  @IsOptional()
+  tipoECF?: TipoECF;
 
   @IsDateString()
   @IsOptional()

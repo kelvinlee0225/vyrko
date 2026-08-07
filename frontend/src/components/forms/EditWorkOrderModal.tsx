@@ -100,7 +100,7 @@ export function EditWorkOrderModal({ orden, onClose, onSaved }: EditWorkOrderMod
               setVehiculoId('')
             }}
             placeholder="Buscar cliente…"
-            options={clientes.map((c) => ({ value: c.id, label: c.nombreRazonSocial, sublabel: c.cedulaRnc ?? undefined }))}
+            options={clientes.map((c) => ({ value: c.id, label: c.nombreRazonSocial, sublabel: c.numeroIdentificacion ?? undefined }))}
           />
         </Field>
 

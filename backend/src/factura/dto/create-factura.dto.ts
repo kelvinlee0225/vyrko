@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { CreateFacturaLineaDto } from './create-factura-linea.dto';
 import { EstadoFactura } from '../enums/estado-factura.enum';
+import { TipoECF } from '../enums/tipo-ecf.enum';
 
 export class CreateFacturaDto {
   @IsUUID()
@@ -32,6 +33,10 @@ export class CreateFacturaDto {
   @IsEnum(EstadoFactura)
   @IsOptional()
   estado?: EstadoFactura;
+
+  @IsEnum(TipoECF)
+  @IsOptional()
+  tipoECF?: TipoECF;
 
   @IsDateString()
   fechaEmision: string;

@@ -5,6 +5,7 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { TipoIdentificacion } from '../enums/tipo-identificacion.enum';
 
 @Entity('cliente')
 export class Cliente {
@@ -26,8 +27,16 @@ export class Cliente {
   @Column({ type: 'boolean', name: 'es_aseguradora', default: false })
   esAseguradora: boolean;
 
-  @Column({ type: 'varchar', name: 'cedula_rnc', nullable: true })
-  cedulaRnc: string | null;
+  @Column({ type: 'varchar', name: 'numero_identificacion', nullable: true })
+  numeroIdentificacion: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: TipoIdentificacion,
+    name: 'tipo_identificacion',
+    default: TipoIdentificacion.NINGUNA,
+  })
+  tipoIdentificacion: TipoIdentificacion;
 
   @Column({ type: 'varchar' })
   telefono: string;

@@ -18,7 +18,7 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
 
   const [nombreRazonSocial, setNombreRazonSocial] = useState('')
   const [tipoCliente, setTipoCliente] = useState<'Persona física' | 'Persona jurídica'>('Persona física')
-  const [cedulaRnc, setCedulaRnc] = useState('')
+  const [numeroIdentificacion, setNumeroIdentificacion] = useState('')
   const [telefono, setTelefono] = useState('')
   const [correo, setCorreo] = useState('')
   const [direccion, setDireccion] = useState('')
@@ -45,7 +45,7 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
         nombreRazonSocial,
         tipoCliente,
         esAseguradora,
-        cedulaRnc: cedulaRnc || undefined,
+        numeroIdentificacion: numeroIdentificacion || undefined,
         telefono,
         correo: correo || undefined,
         direccion: direccion || undefined,
@@ -87,7 +87,12 @@ export function NewClientModal({ onClose }: { onClose: () => void }) {
             </select>
           </Field>
           <Field label="Cédula / RNC (opcional)">
-            <input type="text" value={cedulaRnc} onChange={(e) => setCedulaRnc(e.target.value)} className={fieldClass} />
+            <input
+              type="text"
+              value={numeroIdentificacion}
+              onChange={(e) => setNumeroIdentificacion(e.target.value)}
+              className={fieldClass}
+            />
           </Field>
         </div>
 

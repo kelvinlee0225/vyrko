@@ -101,7 +101,7 @@ export function Invoice() {
               label: 'Tipo',
               value: f.cliente.esAseguradora ? `${f.cliente.tipoCliente} · Aseguradora` : f.cliente.tipoCliente,
             },
-            { label: 'RNC', value: f.cliente.cedulaRnc ?? '—', mono: true },
+            { label: 'RNC', value: f.cliente.numeroIdentificacion ?? '—', mono: true },
             { label: 'Correo', value: f.cliente.correo ?? '—' },
           ]}
         />

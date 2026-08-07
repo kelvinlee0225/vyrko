@@ -73,7 +73,7 @@ export function Client() {
                 </span>
               )}
             </div>
-            {c.cedulaRnc && <span className="font-mono text-[12.5px] text-muted">{c.cedulaRnc}</span>}
+            {c.numeroIdentificacion && <span className="font-mono text-[12.5px] text-muted">{c.numeroIdentificacion}</span>}
           </div>
         </div>
         <Button variant="secondary" disabled title="Próximamente">
