@@ -6,6 +6,7 @@ import { Field, fieldClass, FormError } from '../forms/fields'
 import { useApiList } from '../../hooks/useApiList'
 import { rolService } from '../../services/rol'
 import { usuarioService, type Usuario } from '../../services/usuario'
+import { getErrorMessage } from '../../lib/errors'
 
 interface UsuarioModalProps {
   usuario?: Usuario
@@ -61,8 +62,8 @@ export function UsuarioModal({ usuario, onClose, onSaved }: UsuarioModalProps) {
       }
       onSaved()
       onClose()
-    } catch {
-      setError('No se pudo guardar el usuario. Intenta de nuevo.')
+    } catch (err) {
+      setError(getErrorMessage(err, 'No se pudo guardar el usuario. Intenta de nuevo.'))
     } finally {
       setSubmitting(false)
     }

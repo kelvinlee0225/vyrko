@@ -54,13 +54,17 @@ export class UsuarioController {
 
   @Roles('admin')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
-    return this.usuarioService.update(id, updateUsuarioDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateUsuarioDto: UpdateUsuarioDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.usuarioService.update(id, updateUsuarioDto, user.sub);
   }
 
   @Roles('admin')
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usuarioService.remove(id);
+  remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.usuarioService.remove(id, user.sub);
   }
 }

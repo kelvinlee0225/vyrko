@@ -1,11 +1,11 @@
 import { useState, type SubmitEvent } from 'react'
-import axios from 'axios'
 import { z } from 'zod'
 import { Button } from '../../components/ui/Button'
 import { Field, fieldClass, FormError } from '../../components/forms/fields'
 import { useAuth } from '../../context/useAuth'
 import { useAuthStore } from '../../store/authStore'
 import { usuarioService } from '../../services/usuario'
+import { getErrorMessage } from '../../lib/errors'
 
 const schema = z
   .object({
@@ -18,14 +18,6 @@ const schema = z
     message: 'Ingresa tu contraseña actual para cambiarla.',
     path: ['currentPassword'],
   })
-
-function extractErrorMessage(err: unknown, fallback: string): string {
-  if (axios.isAxiosError(err)) {
-    const message = (err.response?.data as { message?: string } | undefined)?.message
-    if (typeof message === 'string') return message
-  }
-  return fallback
-}
 
 export function EditProfile() {
   const { user } = useAuth()
@@ -62,7 +54,7 @@ export function EditProfile() {
       setCurrentPassword('')
       setSuccess(true)
     } catch (err) {
-      setError(extractErrorMessage(err, 'No se pudo guardar el perfil. Intenta de nuevo.'))
+      setError(getErrorMessage(err, 'No se pudo guardar el perfil. Intenta de nuevo.'))
     } finally {
       setSubmitting(false)
     }

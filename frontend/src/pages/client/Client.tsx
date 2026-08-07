@@ -4,11 +4,12 @@ import { PartyCard } from '../../components/document/PartyCard'
 import { OrdenEstadoBadge, StampBadge } from '../../components/ui/StampBadge'
 import { Button } from '../../components/ui/Button'
 import { NewVehiculoModal } from '../../components/forms/NewVehiculoModal'
+import { EditVehiculoModal } from '../../components/forms/EditVehiculoModal'
 import { IconCustomers, IconShield, IconCar, IconPlus } from '../../components/ui/icons'
 import { useApiResource } from '../../hooks/useApiResource'
 import { useApiList } from '../../hooks/useApiList'
 import { clienteService } from '../../services/cliente'
-import { vehiculoService } from '../../services/vehiculo'
+import { vehiculoService, type Vehiculo } from '../../services/vehiculo'
 import { cotizacionService } from '../../services/cotizacion'
 import { facturaService } from '../../services/factura'
 import { ordenTrabajoService } from '../../services/ordenTrabajo'
@@ -19,6 +20,7 @@ export function Client() {
   const { data: c, loading, error } = useApiResource(() => clienteService.get(id!), id)
   const { data: vehiculos, reload: reloadVehiculos } = useApiList(vehiculoService.list)
   const [showNewVehiculo, setShowNewVehiculo] = useState(false)
+  const [editVehiculo, setEditVehiculo] = useState<Vehiculo | null>(null)
   const { data: cotizaciones } = useApiList(cotizacionService.list)
   const { data: facturas } = useApiList(facturaService.list)
   const { data: ordenesTrabajo } = useApiList(ordenTrabajoService.list)
@@ -128,6 +130,13 @@ export function Client() {
                 <span className="text-[13px] text-muted">
                   {v.marca} {v.modelo} ({v.año}) · {v.color}
                 </span>
+                <button
+                  type="button"
+                  onClick={() => setEditVehiculo(v)}
+                  className="ml-auto cursor-pointer rounded-md px-2 py-1 text-[12px] font-medium text-muted transition-colors hover:bg-surface-alt hover:text-brand"
+                >
+                  Editar
+                </button>
               </div>
             ))}
           </div>
@@ -218,6 +227,17 @@ export function Client() {
           onCreated={() => {
             reloadVehiculos()
             setShowNewVehiculo(false)
+          }}
+        />
+      )}
+
+      {editVehiculo && (
+        <EditVehiculoModal
+          vehiculo={editVehiculo}
+          onClose={() => setEditVehiculo(null)}
+          onSaved={() => {
+            reloadVehiculos()
+            setEditVehiculo(null)
           }}
         />
       )}

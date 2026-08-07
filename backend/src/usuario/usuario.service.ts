@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -27,7 +28,7 @@ export class UsuarioService {
     const { rolId, password, ...rest } = createUsuarioDto;
     const rol = await this.rolService.findOne(rolId);
     const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
-    return this.usuarioRepository.save(
+    return this.saveUnique(
       this.usuarioRepository.create({ ...rest, rol, passwordHash }),
     );
   }
@@ -59,7 +60,18 @@ export class UsuarioService {
   async update(
     id: string,
     updateUsuarioDto: UpdateUsuarioDto,
+    currentUserId: string,
   ): Promise<Usuario> {
+    if (
+      id === currentUserId &&
+      (updateUsuarioDto.activo === false ||
+        updateUsuarioDto.rolId !== undefined)
+    ) {
+      throw new ForbiddenException(
+        'No puedes desactivar tu propio usuario ni cambiar tu propio rol.',
+      );
+    }
+
     const usuario = await this.findOne(id);
     const { rolId, password, ...rest } = updateUsuarioDto;
     if (rolId) {
@@ -69,12 +81,25 @@ export class UsuarioService {
       usuario.passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
     }
     Object.assign(usuario, rest);
-    return this.usuarioRepository.save(usuario);
+    return this.saveUnique(usuario);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, currentUserId: string): Promise<void> {
+    if (id === currentUserId) {
+      throw new ForbiddenException('No puedes eliminar tu propio usuario.');
+    }
+
     const usuario = await this.findOne(id);
-    await this.usuarioRepository.remove(usuario);
+    try {
+      await this.usuarioRepository.remove(usuario);
+    } catch (error) {
+      if ((error as { code?: string }).code === '23503') {
+        throw new ConflictException(
+          'No se puede eliminar el usuario porque está en uso en otros registros.',
+        );
+      }
+      throw error;
+    }
   }
 
   async updateProfile(
@@ -110,6 +135,10 @@ export class UsuarioService {
       usuario.username = username;
     }
 
+    return this.saveUnique(usuario);
+  }
+
+  private async saveUnique(usuario: Usuario): Promise<Usuario> {
     try {
       return await this.usuarioRepository.save(usuario);
     } catch (error) {
