@@ -1,5 +1,17 @@
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsEmail,
+  IsEnum,
+  IsIn,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { AmbienteDgii } from '../enums/ambiente-dgii.enum';
+import {
+  CODIGOS_MUNICIPIO,
+  CODIGOS_PROVINCIA,
+} from '../../common/catalogos/provincia-municipio.catalogo';
 
 export class UpsertEmpresaDto {
   @IsString()
@@ -8,6 +20,9 @@ export class UpsertEmpresaDto {
 
   @IsString()
   @IsNotEmpty()
+  @Matches(/^([0-9]{9}|[0-9]{11})$/, {
+    message: 'rnc debe tener 9 u 11 digitos numericos (formato DGII)',
+  })
   rnc: string;
 
   @IsString()
@@ -16,6 +31,9 @@ export class UpsertEmpresaDto {
 
   @IsString()
   @IsNotEmpty()
+  @Matches(/^\d{3}-\d{3}-\d{4}$/, {
+    message: 'telefono debe tener el formato DGII: 000-000-0000',
+  })
   telefono: string;
 
   @IsEmail()
@@ -25,11 +43,13 @@ export class UpsertEmpresaDto {
   @IsOptional()
   nombreComercial?: string;
 
-  @IsString()
+  /** DGII municipio code (ProvinciaMunicipioType), e.g. "320200" = Santo Domingo Oeste. */
+  @IsIn(CODIGOS_MUNICIPIO)
   @IsOptional()
   municipio?: string;
 
-  @IsString()
+  /** DGII provincia code (ProvinciaMunicipioType), e.g. "320000" = Santo Domingo. */
+  @IsIn(CODIGOS_PROVINCIA)
   @IsOptional()
   provincia?: string;
 

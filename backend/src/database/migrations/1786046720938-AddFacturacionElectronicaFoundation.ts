@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddFacturacionElectronicaFoundation1786046720938
-  implements MigrationInterface
-{
+export class AddFacturacionElectronicaFoundation1786046720938 implements MigrationInterface {
   name = 'AddFacturacionElectronicaFoundation1786046720938';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -60,7 +58,9 @@ export class AddFacturacionElectronicaFoundation1786046720938
       ALTER TABLE "cliente"
         DROP COLUMN "tipo_identificacion"
     `);
-    await queryRunner.query(`DROP TYPE "public"."cliente_tipo_identificacion_enum"`);
+    await queryRunner.query(
+      `DROP TYPE "public"."cliente_tipo_identificacion_enum"`,
+    );
 
     await queryRunner.query(`
       ALTER TABLE "empresa"

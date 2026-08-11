@@ -10,6 +10,7 @@ import {
 import { Servicio } from '../../servicio/entities/servicio.entity';
 import { Pieza } from '../../pieza/entities/pieza.entity';
 import { Factura } from './factura.entity';
+import { IndicadorFacturacion } from '../enums/indicador-facturacion.enum';
 
 @Entity('factura_linea')
 export class FacturaLinea {
@@ -50,4 +51,13 @@ export class FacturaLinea {
 
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   descuento: string | null;
+
+  /**
+   * DGII e-CF tax classification for this line. Auto-set to ITBIS_18 when
+   * itbis > 0; left null for untaxed lines until explicitly classified —
+   * DGII's Exento/0%/No Facturable codes carry distinct legal meaning that
+   * can't be inferred from today's llevaItbis boolean.
+   */
+  @Column({ type: 'int', name: 'indicador_facturacion', nullable: true })
+  indicadorFacturacion: IndicadorFacturacion | null;
 }

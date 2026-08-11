@@ -20,6 +20,8 @@ import { CotizacionModule } from './cotizacion/cotizacion.module';
 import { OrdenTrabajoModule } from './orden-trabajo/orden-trabajo.module';
 import { MovimientoInventarioModule } from './movimiento-inventario/movimiento-inventario.module';
 import { FacturaModule } from './factura/factura.module';
+import { SecuenciaNcfModule } from './secuencia-ncf/secuencia-ncf.module';
+import { FacturacionElectronicaModule } from './facturacion-electronica/facturacion-electronica.module';
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
@@ -56,6 +58,8 @@ import { RolesGuard } from './auth/guards/roles.guard';
     OrdenTrabajoModule,
     MovimientoInventarioModule,
     FacturaModule,
+    SecuenciaNcfModule,
+    FacturacionElectronicaModule,
     AuthModule,
   ],
   controllers: [AppController],

@@ -20,6 +20,7 @@ import { OrdenTrabajoService } from '../orden-trabajo/orden-trabajo.service';
 import { ServicioService } from '../servicio/servicio.service';
 import { PiezaService } from '../pieza/pieza.service';
 import { EstadoFactura } from './enums/estado-factura.enum';
+import { IndicadorFacturacion } from './enums/indicador-facturacion.enum';
 
 const FACTURA_RELATIONS = {
   cliente: true,
@@ -136,6 +137,7 @@ export class FacturaService {
             precioUnitario: linea.precioUnitario,
             itbis: linea.itbis,
             descuento: linea.descuento,
+            indicadorFacturacion: this.resolveIndicadorFacturacion(linea.itbis),
             servicio: linea.servicio,
             pieza: linea.pieza,
             factura,
@@ -307,12 +309,33 @@ export class FacturaService {
 
   private async resolveLineas(lineas: CreateFacturaLineaDto[]) {
     return Promise.all(
-      lineas.map(async ({ servicioId, piezaId, ...rest }) => ({
-        ...rest,
-        servicio: await this.servicioService.findOne(servicioId),
-        pieza: piezaId ? await this.piezaService.findOne(piezaId) : null,
-      })),
+      lineas.map(
+        async ({ servicioId, piezaId, indicadorFacturacion, ...rest }) => ({
+          ...rest,
+          indicadorFacturacion: this.resolveIndicadorFacturacion(
+            rest.itbis,
+            indicadorFacturacion,
+          ),
+          servicio: await this.servicioService.findOne(servicioId),
+          pieza: piezaId ? await this.piezaService.findOne(piezaId) : null,
+        }),
+      ),
     );
+  }
+
+  /**
+   * Only auto-defaults the standard 18% rate when a line is taxed — untaxed
+   * lines are left unclassified (null) since Exento/0%/No Facturable carry
+   * distinct legal meaning that can't be inferred from an itbis amount.
+   */
+  private resolveIndicadorFacturacion(
+    itbis: string,
+    provided?: IndicadorFacturacion,
+  ): IndicadorFacturacion | null {
+    if (provided !== undefined) {
+      return provided;
+    }
+    return parseFloat(itbis) > 0 ? IndicadorFacturacion.ITBIS_18 : null;
   }
 
   private async generateNumero(): Promise<string> {

@@ -1,10 +1,12 @@
 import {
+  IsEnum,
   IsNotEmpty,
   IsNumberString,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
+import { IndicadorFacturacion } from '../enums/indicador-facturacion.enum';
 
 export class CreateFacturaLineaDto {
   @IsUUID()
@@ -30,4 +32,8 @@ export class CreateFacturaLineaDto {
   @IsNumberString()
   @IsOptional()
   descuento?: string;
+
+  @IsEnum(IndicadorFacturacion)
+  @IsOptional()
+  indicadorFacturacion?: IndicadorFacturacion;
 }
