@@ -151,6 +151,8 @@ export class EcfXmlBuilderService {
       this.buildItem(detallesItems, linea, index + 1);
     });
 
+    this.buildDescuentosORecargos(doc, factura);
+
     doc.ele('FechaHoraFirma').txt(formatFechaHora(new Date()));
 
     return doc.end({ prettyPrint: false, headless: false });
@@ -220,6 +222,83 @@ export class EcfXmlBuilderService {
     if (tasa0.montoGravado > 0)
       totalesEl.ele('TotalITBIS3').txt(formatMonto(tasa0.totalItbis));
     totalesEl.ele('MontoTotal').txt(formatMonto(montoTotal));
+  }
+
+  /**
+   * Maps Factura.descuentoGlobal (a single flat amount, no per-category
+   * breakdown in this app's data model) onto DGII's DescuentosORecargos.
+   * When the invoice spans more than one tax category, DGII requires
+   * TipoValor '%' and one DescuentoORecargo line per category present
+   * (Formato Comprobante Fiscal Electronico V1.0, sec. D). Each category's
+   * share is allocated proportional to its pre-discount MontoItem total,
+   * per DGII's own worked example (Informe Tecnico e-CF v1.0, pg. 27-28);
+   * the last category absorbs the rounding remainder so the lines sum
+   * exactly to descuentoGlobal.
+   */
+  private buildDescuentosORecargos(doc: XmlNode, factura: Factura) {
+    const descuentoGlobal = factura.descuentoGlobal
+      ? parseFloat(factura.descuentoGlobal)
+      : 0;
+    if (descuentoGlobal <= 0) return;
+
+    const porTasa = agruparLineasPorIndicador(factura.lineas);
+    const categorias = [
+      IndicadorFacturacion.ITBIS_18,
+      IndicadorFacturacion.ITBIS_16,
+      IndicadorFacturacion.ITBIS_0,
+      IndicadorFacturacion.EXENTO,
+    ]
+      .map((indicador) => ({
+        indicador,
+        montoGravado: porTasa.get(indicador)?.montoGravado ?? 0,
+      }))
+      .filter((c) => c.montoGravado > 0);
+
+    if (categorias.length === 0) return;
+
+    const descuentosORecargos = doc.ele('DescuentosORecargos');
+
+    if (categorias.length === 1) {
+      const entry = descuentosORecargos.ele('DescuentoORecargo');
+      entry.ele('NumeroLinea').txt('1');
+      entry.ele('TipoAjuste').txt('D');
+      entry.ele('TipoValor').txt('$');
+      entry.ele('MontoDescuentooRecargo').txt(formatMonto(descuentoGlobal));
+      entry
+        .ele('IndicadorFacturacionDescuentooRecargo')
+        .txt(String(categorias[0].indicador));
+      return;
+    }
+
+    const basisTotal = categorias.reduce((sum, c) => sum + c.montoGravado, 0);
+    let montoAsignado = 0;
+    categorias.forEach((categoria, index) => {
+      const esUltima = index === categorias.length - 1;
+      const montoDescuento = esUltima
+        ? Math.round((descuentoGlobal - montoAsignado) * 100) / 100
+        : Math.round(
+            (categoria.montoGravado / basisTotal) * descuentoGlobal * 100,
+          ) / 100;
+      montoAsignado += montoDescuento;
+      const valorPorcentaje =
+        Math.round((montoDescuento / categoria.montoGravado) * 100 * 100) / 100;
+
+      if (montoDescuento <= 0 || valorPorcentaje <= 0) {
+        throw new BadRequestException(
+          `El descuento global de la factura ${factura.id} es demasiado pequeno para prorratear entre las categorias de impuesto presentes sin producir un valor no positivo (DGII exige ValorDescuentooRecargo > 0)`,
+        );
+      }
+
+      const entry = descuentosORecargos.ele('DescuentoORecargo');
+      entry.ele('NumeroLinea').txt(String(index + 1));
+      entry.ele('TipoAjuste').txt('D');
+      entry.ele('TipoValor').txt('%');
+      entry.ele('ValorDescuentooRecargo').txt(formatMonto(valorPorcentaje));
+      entry.ele('MontoDescuentooRecargo').txt(formatMonto(montoDescuento));
+      entry
+        .ele('IndicadorFacturacionDescuentooRecargo')
+        .txt(String(categoria.indicador));
+    });
   }
 
   private buildItem(
