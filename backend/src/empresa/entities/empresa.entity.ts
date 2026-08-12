@@ -5,7 +5,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AmbienteDgii } from '../enums/ambiente-dgii.enum';
 
 @Entity('empresa')
 export class Empresa {
@@ -48,13 +47,15 @@ export class Empresa {
   /**
    * The signing certificate (.p12) and its password live on disk at
    * DGII_CERT_PATH / DGII_CERT_PASSWORD, never in the database — see
-   * docs/AWS_DEPLOYMENT.md §3.
+   * docs/AWS_DEPLOYMENT.md §3. Which DGII environment to target
+   * (precertificacion/certificacion/produccion) is the same kind of
+   * deployment concern, read from DGII_AMBIENTE instead of a DB column.
    */
-  @Column({
-    type: 'enum',
-    enum: AmbienteDgii,
-    name: 'ambiente_dgii',
-    default: AmbienteDgii.PRECERTIFICACION,
-  })
-  ambienteDgii: AmbienteDgii;
+
+  /** Cached DGII bearer token (DgiiAuthService), refreshed before expiry. */
+  @Column({ type: 'text', name: 'dgii_token', nullable: true })
+  dgiiToken: string | null;
+
+  @Column({ type: 'timestamptz', name: 'dgii_token_expira', nullable: true })
+  dgiiTokenExpira: Date | null;
 }

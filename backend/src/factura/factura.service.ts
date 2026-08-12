@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
@@ -21,6 +22,7 @@ import { ServicioService } from '../servicio/servicio.service';
 import { PiezaService } from '../pieza/pieza.service';
 import { EstadoFactura } from './enums/estado-factura.enum';
 import { IndicadorFacturacion } from './enums/indicador-facturacion.enum';
+import { EcfSubmissionService } from '../facturacion-electronica/ecf-submission.service';
 
 const FACTURA_RELATIONS = {
   cliente: true,
@@ -37,6 +39,8 @@ const ESTADOS_BLOQUEADOS: EstadoFactura[] = [
 
 @Injectable()
 export class FacturaService {
+  private readonly logger = new Logger(FacturaService.name);
+
   constructor(
     @InjectRepository(Factura)
     private readonly facturaRepository: Repository<Factura>,
@@ -50,6 +54,7 @@ export class FacturaService {
     private readonly ordenTrabajoService: OrdenTrabajoService,
     private readonly servicioService: ServicioService,
     private readonly piezaService: PiezaService,
+    private readonly ecfSubmissionService: EcfSubmissionService,
   ) {}
 
   async create(createFacturaDto: CreateFacturaDto) {
@@ -163,7 +168,28 @@ export class FacturaService {
 
   async findOneDetail(id: string) {
     const factura = await this.findOne(id);
+    await this.reconciliarEstadoDgii(factura);
     return { ...factura, ...this.computeTotales(factura) };
+  }
+
+  /**
+   * On-demand DGII status check: whoever opens an invoice's detail view
+   * pays the extra round-trip so the estado shown is fresh, instead of
+   * running a background poller for every invoice regardless of whether
+   * anyone's looking. A lower-frequency scheduled sweep (DgiiPollingService)
+   * exists only as a safety net for invoices nobody reopens.
+   */
+  private async reconciliarEstadoDgii(factura: Factura): Promise<void> {
+    if (!factura.trackId) {
+      return;
+    }
+    try {
+      await this.ecfSubmissionService.consultarResultado(factura);
+    } catch (error) {
+      this.logger.warn(
+        `No se pudo consultar el resultado DGII de la factura ${factura.id}: ${(error as Error).message}`,
+      );
+    }
   }
 
   async findOne(id: string): Promise<Factura> {

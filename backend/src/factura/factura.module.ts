@@ -10,6 +10,7 @@ import { CotizacionModule } from '../cotizacion/cotizacion.module';
 import { OrdenTrabajoModule } from '../orden-trabajo/orden-trabajo.module';
 import { ServicioModule } from '../servicio/servicio.module';
 import { PiezaModule } from '../pieza/pieza.module';
+import { FacturacionElectronicaModule } from '../facturacion-electronica/facturacion-electronica.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PiezaModule } from '../pieza/pieza.module';
     OrdenTrabajoModule,
     ServicioModule,
     PiezaModule,
+    FacturacionElectronicaModule,
   ],
   controllers: [FacturaController],
   providers: [FacturaService],

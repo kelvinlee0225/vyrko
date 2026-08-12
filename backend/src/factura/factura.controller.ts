@@ -15,11 +15,15 @@ import { CreateFacturaLineaDto } from './dto/create-factura-linea.dto';
 import { UpdateFacturaLineaDto } from './dto/update-factura-linea.dto';
 import { CreateFacturaFromCotizacionDto } from './dto/create-factura-from-cotizacion.dto';
 import { RegistrarPagoDto } from './dto/registrar-pago.dto';
+import { EcfSubmissionService } from '../facturacion-electronica/ecf-submission.service';
 
 @ApiBearerAuth()
 @Controller('facturas')
 export class FacturaController {
-  constructor(private readonly facturaService: FacturaService) {}
+  constructor(
+    private readonly facturaService: FacturaService,
+    private readonly ecfSubmissionService: EcfSubmissionService,
+  ) {}
 
   @Post()
   create(@Body() createFacturaDto: CreateFacturaDto) {
@@ -90,5 +94,10 @@ export class FacturaController {
   @Post(':id/anular')
   anular(@Param('id') id: string) {
     return this.facturaService.anular(id);
+  }
+
+  @Post(':id/enviar-dgii')
+  enviarDgii(@Param('id') id: string) {
+    return this.ecfSubmissionService.submit(id);
   }
 }

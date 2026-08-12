@@ -1,13 +1,11 @@
 import {
   IsEmail,
-  IsEnum,
   IsIn,
   IsNotEmpty,
   IsOptional,
   IsString,
   Matches,
 } from 'class-validator';
-import { AmbienteDgii } from '../enums/ambiente-dgii.enum';
 import {
   CODIGOS_MUNICIPIO,
   CODIGOS_PROVINCIA,
@@ -56,8 +54,4 @@ export class UpsertEmpresaDto {
   @IsString()
   @IsOptional()
   actividadEconomica?: string;
-
-  @IsEnum(AmbienteDgii)
-  @IsOptional()
-  ambienteDgii?: AmbienteDgii;
 }
