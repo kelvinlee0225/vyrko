@@ -141,16 +141,16 @@ export function QuotePrintLayout({
               <span>Subtotal</span>
               <span>{formatCurrency(parseFloat(c.subtotal))}</span>
             </div>
-            <div className="flex justify-between border-b border-black px-3 py-1.5 tabular-nums">
-              <span>ITBIS (18%)</span>
-              <span>{formatCurrency(parseFloat(c.itbisTotal))}</span>
-            </div>
             {descuentoGlobal > 0 && (
               <div className="flex justify-between border-b border-black px-3 py-1.5 tabular-nums">
                 <span>Descuento</span>
                 <span>−{formatCurrency(descuentoGlobal)}</span>
               </div>
             )}
+            <div className="flex justify-between border-b border-black px-3 py-1.5 tabular-nums">
+              <span>ITBIS (18%)</span>
+              <span>{formatCurrency(parseFloat(c.itbisTotal))}</span>
+            </div>
             <div className="flex justify-between px-3 py-2 text-[14px] font-bold tabular-nums">
               <span>Total</span>
               <span>{formatCurrency(parseFloat(c.total))}</span>

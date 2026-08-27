@@ -17,16 +17,16 @@ export function TotalsCard({ subtotal, itbis, descuentoGlobal, total, extraRows,
         <span>Subtotal</span>
         <span className="font-mono tabular-nums">{formatCurrency(subtotal)}</span>
       </div>
-      <div className="flex items-center justify-between text-[13px] text-ink">
-        <span>ITBIS (18%)</span>
-        <span className="font-mono tabular-nums">{formatCurrency(itbis)}</span>
-      </div>
       {descuentoGlobal > 0 && (
         <div className="flex items-center justify-between text-[13px] text-muted">
           <span>Descuento</span>
           <span className="font-mono tabular-nums">−{formatCurrency(descuentoGlobal)}</span>
         </div>
       )}
+      <div className="flex items-center justify-between text-[13px] text-ink">
+        <span>ITBIS (18%)</span>
+        <span className="font-mono tabular-nums">{formatCurrency(itbis)}</span>
+      </div>
       <div className="mt-2 flex items-center justify-between border-t border-line pt-4 text-[17px] font-bold text-brand">
         <span>Total</span>
         <span className="font-mono tabular-nums">{formatCurrency(total)}</span>

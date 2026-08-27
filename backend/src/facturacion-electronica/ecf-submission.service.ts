@@ -16,7 +16,7 @@ import { EcfXmlBuilderService } from './ecf-xml-builder.service';
 import { RfceXmlBuilderService } from './rfce-xml-builder.service';
 import { EcfSignerService } from './ecf-signer.service';
 import { DgiiAuthService } from './dgii-auth.service';
-import { computeMontoItem } from './ecf-xml.util';
+import { computeTotalesEcf, UMBRAL_RFCE } from './ecf-xml.util';
 import {
   DGII_ECF_HOST,
   DGII_FC_HOST,
@@ -24,9 +24,6 @@ import {
   postXmlMultipart,
   resolveAmbienteSegmento,
 } from './dgii-http.util';
-
-/** e-CF 32 (Factura de Consumo) below this amount goes through RFCE instead of full Recepcion. */
-const UMBRAL_RFCE = 250000;
 
 const FACTURA_RELATIONS = {
   cliente: true,
@@ -210,26 +207,16 @@ export class EcfSubmissionService {
     }
   }
 
+  /**
+   * Routes on the same MontoTotal the XML itself carries (computeTotalesEcf),
+   * so an invoice can never be sent down the RFCE path while its e-CF reports
+   * a total at or above the threshold.
+   */
   private esViaRfce(factura: Factura): boolean {
     return (
       factura.tipoECF === TipoECF.CONSUMO &&
-      this.computeMontoTotal(factura) < UMBRAL_RFCE
+      computeTotalesEcf(factura).montoTotal < UMBRAL_RFCE
     );
-  }
-
-  private computeMontoTotal(factura: Factura): number {
-    const subtotal = factura.lineas.reduce(
-      (sum, linea) => sum + computeMontoItem(linea),
-      0,
-    );
-    const itbisTotal = factura.lineas.reduce(
-      (sum, linea) => sum + parseFloat(linea.itbis),
-      0,
-    );
-    const descuentoGlobal = factura.descuentoGlobal
-      ? parseFloat(factura.descuentoGlobal)
-      : 0;
-    return subtotal + itbisTotal - descuentoGlobal;
   }
 
   private async enviarPorRecepcion(

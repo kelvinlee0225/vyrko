@@ -60,18 +60,10 @@
   "58": "crud.ts",
   "59": "factura.ts",
   "60": "ordenTrabajo.ts",
-  "61": "api.ts",
   "62": "vehiculo.ts",
   "63": "AppModule",
-  "64": "InitSchema1782869686899",
   "65": "AddInventoryCatalog1783024534404",
-  "66": "AddAseguradora1783025395234",
-  "67": "AddOrdenTrabajo1783046143655",
-  "68": "AddFactura1783108899928",
   "72": "AddCotizacion1783043552605",
   "73": "AddMovimientoInventario1783051968531",
-  "74": "AddEsAseguradoraToCliente1783268122550",
-  "75": "EnumCotizacionEstado1783658017852",
-  "76": "EnumOrdenTrabajoEstadoYAsignaciones1783703270455",
   "77": "EnumFacturaEstado1783799540998"
 }

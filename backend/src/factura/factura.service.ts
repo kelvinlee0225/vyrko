@@ -23,6 +23,7 @@ import { PiezaService } from '../pieza/pieza.service';
 import { EstadoFactura } from './enums/estado-factura.enum';
 import { IndicadorFacturacion } from './enums/indicador-facturacion.enum';
 import { EcfSubmissionService } from '../facturacion-electronica/ecf-submission.service';
+import { calcularTotales } from '../common/totales/totales.util';
 
 const FACTURA_RELATIONS = {
   cliente: true,
@@ -369,22 +370,16 @@ export class FacturaService {
     return `FAC-${String(count + 1).padStart(6, '0')}`;
   }
 
+  /**
+   * Delegates to the shared calculation so the total billed here is the same
+   * figure the e-CF reports to DGII — a global discount reduces the taxable
+   * base rather than the final amount. See common/totales/totales.util.ts.
+   */
   private computeTotales(factura: Factura) {
-    const subtotal = factura.lineas.reduce(
-      (sum, linea) =>
-        sum +
-        parseFloat(linea.cantidad) * parseFloat(linea.precioUnitario) -
-        (linea.descuento ? parseFloat(linea.descuento) : 0),
-      0,
+    const { subtotal, itbisTotal, total } = calcularTotales(
+      factura.lineas,
+      factura.descuentoGlobal,
     );
-    const itbisTotal = factura.lineas.reduce(
-      (sum, linea) => sum + parseFloat(linea.itbis),
-      0,
-    );
-    const descuentoGlobal = factura.descuentoGlobal
-      ? parseFloat(factura.descuentoGlobal)
-      : 0;
-    const total = subtotal + itbisTotal - descuentoGlobal;
     const saldoPendiente = total - parseFloat(factura.montoPagado);
 
     return {

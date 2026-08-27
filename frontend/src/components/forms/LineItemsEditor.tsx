@@ -12,9 +12,14 @@ interface LineItemsEditorProps {
   onChange: (lineas: LineaItemDraft[]) => void
 }
 
-function computeItbis(cantidad: number, precioUnitario: number, llevaItbis: boolean) {
+/**
+ * ITBIS is charged on the line's own net amount, so a per-line discount lowers
+ * it too. DGII derives TotalITBIS from the discounted base (Formato Comprobante
+ * Fiscal Electronico V1.0, field 101), and the backend files the e-CF that way.
+ */
+function computeItbis(cantidad: number, precioUnitario: number, descuento: number, llevaItbis: boolean) {
   if (!llevaItbis) return 0
-  return Math.round(cantidad * precioUnitario * 0.18 * 100) / 100
+  return Math.round(Math.max(cantidad * precioUnitario - descuento, 0) * 0.18 * 100) / 100
 }
 
 function autoLabel(servicioNombre?: string, piezaNombre?: string) {
@@ -28,10 +33,13 @@ export function LineItemsEditor({ lineas, onChange }: LineItemsEditorProps) {
 
   function updateLinea(index: number, patch: Partial<LineaItemDraft>) {
     const next = lineas.map((l, i) => (i === index ? { ...l, ...patch } : l))
-    if (patch.cantidad !== undefined || patch.precioUnitario !== undefined) {
+    if (patch.cantidad !== undefined || patch.precioUnitario !== undefined || patch.descuento !== undefined) {
       const linea = next[index]
       const servicio = servicios.find((s) => s.id === linea.servicioId)
-      next[index] = { ...linea, itbis: computeItbis(linea.cantidad, linea.precioUnitario, servicio?.llevaItbis ?? true) }
+      next[index] = {
+        ...linea,
+        itbis: computeItbis(linea.cantidad, linea.precioUnitario, linea.descuento, servicio?.llevaItbis ?? true),
+      }
     }
     onChange(next)
   }
@@ -51,7 +59,7 @@ export function LineItemsEditor({ lineas, onChange }: LineItemsEditorProps) {
       descripcion,
       precioUnitario: servicio ? parseFloat(servicio.precioBase) : linea.precioUnitario,
       itbis: servicio
-        ? computeItbis(linea.cantidad, parseFloat(servicio.precioBase), servicio.llevaItbis)
+        ? computeItbis(linea.cantidad, parseFloat(servicio.precioBase), linea.descuento, servicio.llevaItbis)
         : linea.itbis,
     })
   }

@@ -12,6 +12,7 @@ import { VehiculoService } from '../vehiculo/vehiculo.service';
 import { ServicioService } from '../servicio/servicio.service';
 import { PiezaService } from '../pieza/pieza.service';
 import { EstadoCotizacion } from './enums/estado-cotizacion.enum';
+import { calcularTotales } from '../common/totales/totales.util';
 
 const COTIZACION_RELATIONS = {
   cliente: true,
@@ -215,22 +216,16 @@ export class CotizacionService {
     return `COT-${String(count + 1).padStart(6, '0')}`;
   }
 
+  /**
+   * Same shared calculation the factura uses, so a quote's total still matches
+   * the invoice generated from it — createFromCotizacion copies descuentoGlobal
+   * straight across. See common/totales/totales.util.ts.
+   */
   private computeTotales(cotizacion: Cotizacion) {
-    const subtotal = cotizacion.lineas.reduce(
-      (sum, linea) =>
-        sum +
-        parseFloat(linea.cantidad) * parseFloat(linea.precioUnitario) -
-        (linea.descuento ? parseFloat(linea.descuento) : 0),
-      0,
+    const { subtotal, itbisTotal, total } = calcularTotales(
+      cotizacion.lineas,
+      cotizacion.descuentoGlobal,
     );
-    const itbisTotal = cotizacion.lineas.reduce(
-      (sum, linea) => sum + parseFloat(linea.itbis),
-      0,
-    );
-    const descuentoGlobal = cotizacion.descuentoGlobal
-      ? parseFloat(cotizacion.descuentoGlobal)
-      : 0;
-    const total = subtotal + itbisTotal - descuentoGlobal;
 
     return {
       subtotal: subtotal.toFixed(2),

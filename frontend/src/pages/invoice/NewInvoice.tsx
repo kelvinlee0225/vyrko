@@ -285,10 +285,6 @@ export function NewInvoice() {
               <span>Subtotal</span>
               <span className="font-mono tabular-nums">{formatCurrency(totales.subtotal)}</span>
             </div>
-            <div className="flex items-center justify-between text-[13px] text-ink">
-              <span>ITBIS</span>
-              <span className="font-mono tabular-nums">{formatCurrency(totales.itbis)}</span>
-            </div>
             <Field label="Descuento global">
               <input
                 type="number"
@@ -299,6 +295,10 @@ export function NewInvoice() {
                 className={fieldClass}
               />
             </Field>
+            <div className="flex items-center justify-between text-[13px] text-ink">
+              <span>ITBIS</span>
+              <span className="font-mono tabular-nums">{formatCurrency(totales.itbis)}</span>
+            </div>
             <div className="mt-2 flex items-center justify-between border-t border-line pt-4 text-[17px] font-bold text-brand">
               <span>Total</span>
               <span className="font-mono tabular-nums">{formatCurrency(totales.total)}</span>

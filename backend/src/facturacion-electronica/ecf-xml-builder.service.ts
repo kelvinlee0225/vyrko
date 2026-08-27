@@ -7,12 +7,15 @@ import { TipoECF } from '../factura/enums/tipo-ecf.enum';
 import { TipoIdentificacion } from '../cliente/enums/tipo-identificacion.enum';
 import { IndicadorFacturacion } from '../factura/enums/indicador-facturacion.enum';
 import {
-  agruparLineasPorIndicador,
   assertMaxLength,
   computeMontoItem,
+  computeTotalesEcf,
+  esPagoCredito,
   formatFechaHora,
   formatFechaIso,
   formatMonto,
+  TotalesEcf,
+  UMBRAL_RFCE,
 } from './ecf-xml.util';
 
 /** xmlbuilder2 doesn't re-export its XMLBuilder interface from the package root. */
@@ -26,6 +29,10 @@ type XmlNode = ReturnType<typeof create>;
  * SecuenciaNcf or persist anything, since assigning a real e-NCF is a
  * one-way action that belongs to the submission orchestration, not a
  * builder that could be called more than once.
+ *
+ * Every amount comes from computeTotalesEcf so the totals, the
+ * DescuentosORecargos lines and the RFCE routing threshold agree by
+ * construction — see ecf-xml.util.ts for DGII's discount/ITBIS model.
  *
  * Deliberately out of scope for this pass (all optional per XSD, unused by
  * this app's data model today): Transporte, InformacionesAdicionales,
@@ -56,19 +63,10 @@ export class EcfXmlBuilderService {
         'La secuencia de e-NCF para tipo 31 no tiene fecha de vencimiento registrada; DGII la exige en el XML',
       );
     }
+
+    const totales = computeTotalesEcf(factura);
     const rncOCedulaComprador = this.resolveRncCedulaComprador(factura);
-    if (factura.tipoECF === TipoECF.CREDITO_FISCAL && !rncOCedulaComprador) {
-      throw new BadRequestException(
-        `El cliente de la factura ${factura.id} no tiene RNC/cedula registrado; requerido para e-CF tipo 31 (Factura de Credito Fiscal)`,
-      );
-    }
-    for (const linea of factura.lineas) {
-      if (linea.indicadorFacturacion === null) {
-        throw new BadRequestException(
-          `La linea "${linea.descripcion}" de la factura ${factura.id} no tiene un indicador de facturacion (ITBIS/Exento/0%/No Facturable) asignado`,
-        );
-      }
-    }
+    this.assertCompradorIdentificado(factura, rncOCedulaComprador, totales);
 
     const doc = create({ version: '1.0', encoding: 'UTF-8' }).ele('ECF');
     const encabezado = doc.ele('Encabezado');
@@ -83,7 +81,8 @@ export class EcfXmlBuilderService {
         .txt(formatFechaIso(fechaVencimientoSecuencia!));
     }
     idDoc.ele('TipoIngresos').txt('01'); // Ingresos por operaciones (No financieros) — the only category this app's ordinary sales fall under
-    idDoc.ele('TipoPago').txt(factura.fechaVencimiento ? '2' : '1'); // 2=Credito if a due date was set, 1=Contado otherwise
+    idDoc.ele('TipoPago').txt(esPagoCredito(factura) ? '2' : '1'); // 2=Credito if a due date was set, 1=Contado otherwise
+    this.buildFechaLimitePago(idDoc, factura);
 
     const emisor = encabezado.ele('Emisor');
     emisor
@@ -144,14 +143,14 @@ export class EcfXmlBuilderService {
         ),
       );
 
-    this.buildTotales(encabezado.ele('Totales'), factura);
+    this.buildTotales(encabezado.ele('Totales'), totales);
 
     const detallesItems = doc.ele('DetallesItems');
     factura.lineas.forEach((linea, index) => {
       this.buildItem(detallesItems, linea, index + 1);
     });
 
-    this.buildDescuentosORecargos(doc, factura);
+    this.buildDescuentosORecargos(doc, totales);
 
     doc.ele('FechaHoraFirma').txt(formatFechaHora(new Date()));
 
@@ -169,132 +168,138 @@ export class EcfXmlBuilderService {
     return numeroIdentificacion;
   }
 
-  private buildTotales(totalesEl: XmlNode, factura: Factura) {
-    const porTasa = agruparLineasPorIndicador(factura.lineas);
-    const tasa18 = porTasa.get(IndicadorFacturacion.ITBIS_18) ?? {
-      montoGravado: 0,
-      totalItbis: 0,
-    };
-    const tasa16 = porTasa.get(IndicadorFacturacion.ITBIS_16) ?? {
-      montoGravado: 0,
-      totalItbis: 0,
-    };
-    const tasa0 = porTasa.get(IndicadorFacturacion.ITBIS_0) ?? {
-      montoGravado: 0,
-      totalItbis: 0,
-    };
-    const exento = porTasa.get(IndicadorFacturacion.EXENTO) ?? {
-      montoGravado: 0,
-      totalItbis: 0,
-    };
+  /**
+   * Tipo 31 always requires the buyer's RNC (Formato field 38, obligatoriedad 1
+   * for Factura de Credito Fiscal). Tipo 32 requires it only once the invoice
+   * reaches RD$250,000: "Si el e-CF es tipo 32 y el monto total es >=
+   * DOP$250,000.00 se debe identificar RNC Comprador" (Formato field 38
+   * validacion b, pg. 12; RazonSocialComprador likewise per field 40, which
+   * this builder always emits from Cliente.nombreRazonSocial).
+   *
+   * DGII's alternative for a foreign buyer at that threshold is
+   * IdentificadorExtranjero, which this app has no data model for — so an
+   * explicit error is the only honest outcome rather than filing an e-CF DGII
+   * will reject.
+   */
+  private assertCompradorIdentificado(
+    factura: Factura,
+    rncOCedulaComprador: string | null,
+    totales: TotalesEcf,
+  ): void {
+    if (rncOCedulaComprador) return;
 
-    const montoGravadoTotal =
-      tasa18.montoGravado + tasa16.montoGravado + tasa0.montoGravado;
-    const totalItbis = tasa18.totalItbis + tasa16.totalItbis + tasa0.totalItbis;
-    const descuentoGlobal = factura.descuentoGlobal
-      ? parseFloat(factura.descuentoGlobal)
-      : 0;
-    const montoTotal =
-      montoGravadoTotal + exento.montoGravado + totalItbis - descuentoGlobal;
+    if (factura.tipoECF === TipoECF.CREDITO_FISCAL) {
+      throw new BadRequestException(
+        `El cliente de la factura ${factura.id} no tiene RNC/cedula registrado; requerido para e-CF tipo 31 (Factura de Credito Fiscal)`,
+      );
+    }
+    if (totales.montoTotal >= UMBRAL_RFCE) {
+      throw new BadRequestException(
+        `El cliente de la factura ${factura.id} no tiene RNC/cedula registrado; la DGII lo exige en una factura de consumo (tipo 32) de RD$${formatMonto(totales.montoTotal)}, por alcanzar o superar RD$${formatMonto(UMBRAL_RFCE)}`,
+      );
+    }
+  }
+
+  /**
+   * Conditionally required whenever TipoPago is 2 (Credito): "Solo para
+   * facturas a credito. Condicional a que el tipo de pago sea a credito", with
+   * validacion b) "Fecha limite de pago debe ser >= Fecha de emision"
+   * (Formato field 10, pg. 8 — obligatoriedad 2 for both tipo 31 and 32).
+   * Sits directly after TipoPago per the XSD's xs:sequence.
+   */
+  private buildFechaLimitePago(idDoc: XmlNode, factura: Factura): void {
+    if (!esPagoCredito(factura)) return;
+
+    const fechaVencimiento = factura.fechaVencimiento!;
+    if (fechaVencimiento < factura.fechaEmision) {
+      throw new BadRequestException(
+        `La fecha de vencimiento de la factura ${factura.id} (${fechaVencimiento}) es anterior a su fecha de emision (${factura.fechaEmision}); la DGII exige que la fecha limite de pago sea igual o posterior a la de emision`,
+      );
+    }
+    idDoc.ele('FechaLimitePago').txt(formatFechaIso(fechaVencimiento));
+  }
+
+  private buildTotales(totalesEl: XmlNode, totales: TotalesEcf) {
+    const tasa18 = totales.porIndicador.get(IndicadorFacturacion.ITBIS_18);
+    const tasa16 = totales.porIndicador.get(IndicadorFacturacion.ITBIS_16);
+    const tasa0 = totales.porIndicador.get(IndicadorFacturacion.ITBIS_0);
+    const exento = totales.porIndicador.get(IndicadorFacturacion.EXENTO);
 
     // Order matches the XSD's xs:sequence exactly — DGII validates positionally.
-    totalesEl.ele('MontoGravadoTotal').txt(formatMonto(montoGravadoTotal));
-    if (tasa18.montoGravado > 0) {
+    totalesEl
+      .ele('MontoGravadoTotal')
+      .txt(formatMonto(totales.montoGravadoTotal));
+    if (tasa18) {
       totalesEl.ele('MontoGravadoI1').txt(formatMonto(tasa18.montoGravado));
     }
-    if (tasa16.montoGravado > 0) {
+    if (tasa16) {
       totalesEl.ele('MontoGravadoI2').txt(formatMonto(tasa16.montoGravado));
     }
-    if (tasa0.montoGravado > 0) {
+    if (tasa0) {
       totalesEl.ele('MontoGravadoI3').txt(formatMonto(tasa0.montoGravado));
     }
-    if (exento.montoGravado > 0) {
+    if (exento) {
       totalesEl.ele('MontoExento').txt(formatMonto(exento.montoGravado));
     }
-    if (tasa18.montoGravado > 0) totalesEl.ele('ITBIS1').txt('18');
-    if (tasa16.montoGravado > 0) totalesEl.ele('ITBIS2').txt('16');
-    if (tasa0.montoGravado > 0) totalesEl.ele('ITBIS3').txt('0');
-    totalesEl.ele('TotalITBIS').txt(formatMonto(totalItbis));
-    if (tasa18.montoGravado > 0)
+    if (tasa18) totalesEl.ele('ITBIS1').txt('18');
+    if (tasa16) totalesEl.ele('ITBIS2').txt('16');
+    if (tasa0) totalesEl.ele('ITBIS3').txt('0');
+    totalesEl.ele('TotalITBIS').txt(formatMonto(totales.totalItbis));
+    if (tasa18)
       totalesEl.ele('TotalITBIS1').txt(formatMonto(tasa18.totalItbis));
-    if (tasa16.montoGravado > 0)
+    if (tasa16)
       totalesEl.ele('TotalITBIS2').txt(formatMonto(tasa16.totalItbis));
-    if (tasa0.montoGravado > 0)
-      totalesEl.ele('TotalITBIS3').txt(formatMonto(tasa0.totalItbis));
-    totalesEl.ele('MontoTotal').txt(formatMonto(montoTotal));
+    if (tasa0) totalesEl.ele('TotalITBIS3').txt(formatMonto(tasa0.totalItbis));
+    totalesEl.ele('MontoTotal').txt(formatMonto(totales.montoTotal));
+    // Reported alongside MontoTotal but never part of it: "Total de la suma de
+    // montos de bienes o servicios con Indicador de facturacion=0. Condicional
+    // a que en la linea de detalle exista algun item con indicador facturacion
+    // igual a cero (0)" (Formato field 111, pg. 26).
+    if (totales.montoNoFacturable > 0) {
+      totalesEl
+        .ele('MontoNoFacturable')
+        .txt(formatMonto(totales.montoNoFacturable));
+    }
   }
 
   /**
    * Maps Factura.descuentoGlobal (a single flat amount, no per-category
-   * breakdown in this app's data model) onto DGII's DescuentosORecargos.
-   * When the invoice spans more than one tax category, DGII requires
-   * TipoValor '%' and one DescuentoORecargo line per category present
-   * (Formato Comprobante Fiscal Electronico V1.0, sec. D). Each category's
-   * share is allocated proportional to its pre-discount MontoItem total,
-   * per DGII's own worked example (Informe Tecnico e-CF v1.0, pg. 27-28);
-   * the last category absorbs the rounding remainder so the lines sum
-   * exactly to descuentoGlobal.
+   * breakdown in this app's data model) onto DGII's DescuentosORecargos, using
+   * the same per-category allocation computeTotalesEcf already applied to the
+   * totals — so the two sections cannot drift apart.
+   *
+   * When the invoice spans more than one tax category, DGII requires TipoValor
+   * '%' and one DescuentoORecargo line per category present (Formato
+   * Comprobante Fiscal Electronico V1.0, pg. 48, seccion D a) and b) 3).
    */
-  private buildDescuentosORecargos(doc: XmlNode, factura: Factura) {
-    const descuentoGlobal = factura.descuentoGlobal
-      ? parseFloat(factura.descuentoGlobal)
-      : 0;
-    if (descuentoGlobal <= 0) return;
-
-    const porTasa = agruparLineasPorIndicador(factura.lineas);
-    const categorias = [
-      IndicadorFacturacion.ITBIS_18,
-      IndicadorFacturacion.ITBIS_16,
-      IndicadorFacturacion.ITBIS_0,
-      IndicadorFacturacion.EXENTO,
-    ]
-      .map((indicador) => ({
-        indicador,
-        montoGravado: porTasa.get(indicador)?.montoGravado ?? 0,
-      }))
-      .filter((c) => c.montoGravado > 0);
-
-    if (categorias.length === 0) return;
+  private buildDescuentosORecargos(doc: XmlNode, totales: TotalesEcf) {
+    if (totales.descuentoGlobal <= 0 || totales.categorias.length === 0) return;
 
     const descuentosORecargos = doc.ele('DescuentosORecargos');
+    const porPorcentaje = totales.categorias.length > 1;
 
-    if (categorias.length === 1) {
-      const entry = descuentosORecargos.ele('DescuentoORecargo');
-      entry.ele('NumeroLinea').txt('1');
-      entry.ele('TipoAjuste').txt('D');
-      entry.ele('TipoValor').txt('$');
-      entry.ele('MontoDescuentooRecargo').txt(formatMonto(descuentoGlobal));
-      entry
-        .ele('IndicadorFacturacionDescuentooRecargo')
-        .txt(String(categorias[0].indicador));
-      return;
-    }
-
-    const basisTotal = categorias.reduce((sum, c) => sum + c.montoGravado, 0);
-    let montoAsignado = 0;
-    categorias.forEach((categoria, index) => {
-      const esUltima = index === categorias.length - 1;
-      const montoDescuento = esUltima
-        ? Math.round((descuentoGlobal - montoAsignado) * 100) / 100
-        : Math.round(
-            (categoria.montoGravado / basisTotal) * descuentoGlobal * 100,
-          ) / 100;
-      montoAsignado += montoDescuento;
-      const valorPorcentaje =
-        Math.round((montoDescuento / categoria.montoGravado) * 100 * 100) / 100;
-
-      if (montoDescuento <= 0 || valorPorcentaje <= 0) {
-        throw new BadRequestException(
-          `El descuento global de la factura ${factura.id} es demasiado pequeno para prorratear entre las categorias de impuesto presentes sin producir un valor no positivo (DGII exige ValorDescuentooRecargo > 0)`,
-        );
-      }
-
+    totales.categorias.forEach((categoria, index) => {
       const entry = descuentosORecargos.ele('DescuentoORecargo');
       entry.ele('NumeroLinea').txt(String(index + 1));
       entry.ele('TipoAjuste').txt('D');
-      entry.ele('TipoValor').txt('%');
-      entry.ele('ValorDescuentooRecargo').txt(formatMonto(valorPorcentaje));
-      entry.ele('MontoDescuentooRecargo').txt(formatMonto(montoDescuento));
+      entry.ele('TipoValor').txt(porPorcentaje ? '%' : '$');
+      if (porPorcentaje) {
+        const valorPorcentaje =
+          Math.round(
+            (categoria.descuentoAsignado / categoria.montoGravadoBruto) *
+              100 *
+              100,
+          ) / 100;
+        if (categoria.descuentoAsignado <= 0 || valorPorcentaje <= 0) {
+          throw new BadRequestException(
+            `El descuento global es demasiado pequeno para prorratear entre las categorias de impuesto presentes sin producir un valor no positivo (DGII exige ValorDescuentooRecargo > 0)`,
+          );
+        }
+        entry.ele('ValorDescuentooRecargo').txt(formatMonto(valorPorcentaje));
+      }
+      entry
+        .ele('MontoDescuentooRecargo')
+        .txt(formatMonto(categoria.descuentoAsignado));
       entry
         .ele('IndicadorFacturacionDescuentooRecargo')
         .txt(String(categoria.indicador));
