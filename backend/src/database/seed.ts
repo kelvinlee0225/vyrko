@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import { config } from 'dotenv';
+import { randomBytes } from 'crypto';
 import { NestFactory } from '@nestjs/core';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -18,6 +19,8 @@ config();
 const ROLES = ['admin', 'usuario', 'supervisor', 'contable'];
 
 const SALT_ROUNDS = 10;
+
+const DEFAULT_ADMIN_USERNAME = 'admin';
 
 const PIEZAS = [
   'Bómper trasero',
@@ -186,35 +189,47 @@ async function seedRoles(
   return porNombre;
 }
 
+/** URL-safe, no ambiguous-character issues when copy-pasted from a terminal. */
+function generateRandomPassword(): string {
+  return randomBytes(18).toString('base64url');
+}
+
 async function seedAdminUser(
   usuarioRepository: Repository<Usuario>,
   adminRol: Rol,
 ): Promise<void> {
-  const username = process.env.ADMIN_USERNAME;
-  const password = process.env.ADMIN_PASSWORD;
-  if (!username || !password) {
-    console.warn(
-      'ADMIN_USERNAME / ADMIN_PASSWORD no están definidos en .env, se omite el usuario admin.',
-    );
-    return;
-  }
-
-  const existente = await usuarioRepository.findOne({ where: { username } });
+  const existente = await usuarioRepository.findOne({
+    where: { username: DEFAULT_ADMIN_USERNAME },
+  });
   if (existente) {
-    console.log(`Usuario "${username}" ya existe, se omite.`);
+    console.log(`Usuario "${DEFAULT_ADMIN_USERNAME}" ya existe, se omite.`);
     return;
   }
 
+  const password = generateRandomPassword();
   const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
   await usuarioRepository.save(
     usuarioRepository.create({
-      nombre: username,
-      username,
+      nombre: 'Administrador',
+      username: DEFAULT_ADMIN_USERNAME,
       passwordHash,
       rol: adminRol,
+      mustChangePassword: true,
     }),
   );
-  console.log(`Usuario admin "${username}" creado.`);
+
+  // Only place this password is ever shown — it is never persisted or logged again.
+  console.log('');
+  console.log('='.repeat(64));
+  console.log('  USUARIO ADMIN CREADO — GUARDA ESTA CONTRASEÑA AHORA');
+  console.log('='.repeat(64));
+  console.log(`  Usuario:     ${DEFAULT_ADMIN_USERNAME}`);
+  console.log(`  Contraseña:  ${password}`);
+  console.log('');
+  console.log('  Se te pedirá cambiarla al iniciar sesión por primera vez.');
+  console.log('  Este mensaje no volverá a mostrarse.');
+  console.log('='.repeat(64));
+  console.log('');
 }
 
 async function seedPiezas(piezaRepository: Repository<Pieza>): Promise<void> {
@@ -268,11 +283,9 @@ async function seedMateriales(
     }
   }
 
-  const admin = process.env.ADMIN_USERNAME
-    ? await usuarioRepository.findOne({
-        where: { username: process.env.ADMIN_USERNAME },
-      })
-    : null;
+  const admin = await usuarioRepository.findOne({
+    where: { username: DEFAULT_ADMIN_USERNAME },
+  });
 
   const materialesExistentes = await materialRepository.find();
   const codigosExistentes = new Set(materialesExistentes.map((m) => m.codigo));

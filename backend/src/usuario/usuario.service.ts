@@ -127,6 +127,7 @@ export class UsuarioService {
         throw new BadRequestException('La contraseña actual no es correcta.');
       }
       usuario.passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+      usuario.mustChangePassword = false;
     }
     if (nombre !== undefined) {
       usuario.nombre = nombre;

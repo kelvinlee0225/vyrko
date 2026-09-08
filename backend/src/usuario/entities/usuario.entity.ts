@@ -14,12 +14,6 @@ export class Usuario {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => Rol)
   @JoinColumn({ name: 'rol_id' })
   rol: Rol;
@@ -35,4 +29,13 @@ export class Usuario {
 
   @Column({ type: 'boolean', default: true })
   activo: boolean;
+
+  @Column({ type: 'boolean', name: 'must_change_password', default: false })
+  mustChangePassword: boolean;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

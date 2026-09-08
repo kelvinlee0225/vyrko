@@ -69,6 +69,7 @@ export class AuthService {
       sub: usuario.id,
       username: usuario.username,
       rol: usuario.rol.nombre,
+      mustChangePassword: usuario.mustChangePassword,
     });
   }
 

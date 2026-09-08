@@ -14,6 +14,7 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AllowPasswordChange } from '../auth/decorators/allow-password-change.decorator';
 import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 
 @ApiBearerAuth()
@@ -21,11 +22,13 @@ import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
+  @AllowPasswordChange()
   @Get('me')
   getMe(@CurrentUser() user: JwtPayload) {
     return this.usuarioService.findOne(user.sub);
   }
 
+  @AllowPasswordChange()
   @Patch('me')
   updateMe(
     @CurrentUser() user: JwtPayload,

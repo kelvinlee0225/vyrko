@@ -26,6 +26,7 @@ import { FacturacionElectronicaModule } from './facturacion-electronica/facturac
 import { AuthModule } from './auth/auth.module';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { RolesGuard } from './auth/guards/roles.guard';
+import { PasswordChangeGuard } from './auth/guards/password-change.guard';
 
 @Module({
   imports: [
@@ -74,6 +75,10 @@ import { RolesGuard } from './auth/guards/roles.guard';
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: PasswordChangeGuard,
     },
   ],
 })
