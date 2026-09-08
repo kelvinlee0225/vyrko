@@ -7,14 +7,14 @@ export class AddSecuenciaNcf1786069785459 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "secuencia_ncf" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "tipo_ecf" int NOT NULL,
         "desde" int NOT NULL,
         "hasta" int NOT NULL,
         "actual" int NOT NULL,
         "fecha_vencimiento" date,
         "activa" boolean NOT NULL DEFAULT true,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_secuencia_ncf" PRIMARY KEY ("id")
       )
     `);

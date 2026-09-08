@@ -11,12 +11,6 @@ export class Empresa {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @Column({ type: 'varchar' })
   nombre: string;
 
@@ -58,4 +52,10 @@ export class Empresa {
 
   @Column({ type: 'timestamptz', name: 'dgii_token_expira', nullable: true })
   dgiiTokenExpira: Date | null;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

@@ -14,12 +14,6 @@ export class Material {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => CategoriaMaterial)
   @JoinColumn({ name: 'categoria_id' })
   categoria: CategoriaMaterial;
@@ -44,4 +38,10 @@ export class Material {
 
   @Column({ type: 'int', name: 'stock_minimo', default: 0 })
   stockMinimo: number;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

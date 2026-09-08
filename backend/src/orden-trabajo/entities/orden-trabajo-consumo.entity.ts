@@ -15,12 +15,6 @@ export class OrdenTrabajoConsumo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => OrdenTrabajo, (ordenTrabajo) => ordenTrabajo.consumos, {
     onDelete: 'CASCADE',
   })
@@ -33,4 +27,10 @@ export class OrdenTrabajoConsumo {
 
   @Column({ type: 'decimal', precision: 10, scale: 2, name: 'cantidad_real' })
   cantidadReal: string;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

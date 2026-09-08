@@ -11,12 +11,6 @@ export class Servicio {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @Column({ type: 'varchar' })
   nombre: string;
 
@@ -28,4 +22,10 @@ export class Servicio {
 
   @Column({ type: 'boolean', name: 'lleva_itbis', default: true })
   llevaItbis: boolean;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

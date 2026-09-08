@@ -7,9 +7,9 @@ export class AddInventoryCatalog1783024534404 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "categoria_material" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_categoria_material" PRIMARY KEY ("id")
       )
     `);
@@ -17,14 +17,14 @@ export class AddInventoryCatalog1783024534404 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "material" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "categoria_id" uuid NOT NULL,
         "codigo" varchar NOT NULL,
         "nombre" varchar NOT NULL,
         "precio_costo" decimal(12,2) NOT NULL,
         "stock_actual" decimal(10,2) NOT NULL DEFAULT 0,
         "stock_minimo" int NOT NULL DEFAULT 0,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_material" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_material_codigo" UNIQUE ("codigo"),
         CONSTRAINT "FK_material_categoria" FOREIGN KEY ("categoria_id") REFERENCES "categoria_material" ("id")
@@ -34,8 +34,6 @@ export class AddInventoryCatalog1783024534404 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "proveedor" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         "rnc_cedula" varchar,
         "telefono" varchar,
@@ -43,6 +41,8 @@ export class AddInventoryCatalog1783024534404 implements MigrationInterface {
         "direccion" varchar,
         "contacto" varchar,
         "emite_comprobante" boolean NOT NULL DEFAULT true,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_proveedor" PRIMARY KEY ("id")
       )
     `);
@@ -50,12 +50,12 @@ export class AddInventoryCatalog1783024534404 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "servicio" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         "tipo_trabajo" varchar NOT NULL,
         "precio_base" decimal(12,2) NOT NULL,
         "lleva_itbis" boolean NOT NULL DEFAULT true,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_servicio" PRIMARY KEY ("id")
       )
     `);
@@ -63,9 +63,9 @@ export class AddInventoryCatalog1783024534404 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "pieza" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_pieza" PRIMARY KEY ("id")
       )
     `);

@@ -22,12 +22,6 @@ export class Factura {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => Cliente)
   @JoinColumn({ name: 'cliente_id' })
   cliente: Cliente;
@@ -128,4 +122,10 @@ export class Factura {
   /** JSON-stringified array of {codigo, valor} messages from DGII's responses. */
   @Column({ type: 'text', name: 'mensajes_dgii', nullable: true })
   mensajesDgii: string | null;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

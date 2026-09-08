@@ -16,12 +16,6 @@ export class MovimientoInventario {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => Material)
   @JoinColumn({ name: 'material_id' })
   material: Material;
@@ -42,4 +36,10 @@ export class MovimientoInventario {
 
   @Column({ type: 'varchar', nullable: true })
   motivo: string | null;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

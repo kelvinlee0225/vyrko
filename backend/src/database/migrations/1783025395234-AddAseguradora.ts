@@ -7,13 +7,13 @@ export class AddAseguradora1783025395234 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "aseguradora" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         "rnc_cedula" varchar,
         "telefono" varchar,
         "correo" varchar,
         "direccion" varchar,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_aseguradora" PRIMARY KEY ("id")
       )
     `);

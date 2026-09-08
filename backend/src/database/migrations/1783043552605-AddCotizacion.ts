@@ -7,8 +7,6 @@ export class AddCotizacion1783043552605 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "cotizacion" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "cliente_id" uuid NOT NULL,
         "vehiculo_id" uuid NOT NULL,
         "numero" varchar NOT NULL,
@@ -16,6 +14,8 @@ export class AddCotizacion1783043552605 implements MigrationInterface {
         "fecha_validez" date NOT NULL,
         "descuento_global" decimal(12,2),
         "notas" text,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_cotizacion" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_cotizacion_numero" UNIQUE ("numero"),
         CONSTRAINT "FK_cotizacion_cliente" FOREIGN KEY ("cliente_id") REFERENCES "cliente" ("id"),
@@ -26,8 +26,6 @@ export class AddCotizacion1783043552605 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "cotizacion_linea" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "cotizacion_id" uuid NOT NULL,
         "servicio_id" uuid NOT NULL,
         "pieza_id" uuid,
@@ -36,6 +34,8 @@ export class AddCotizacion1783043552605 implements MigrationInterface {
         "precio_unitario" decimal(12,2) NOT NULL,
         "itbis" decimal(12,2) NOT NULL,
         "descuento" decimal(12,2),
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_cotizacion_linea" PRIMARY KEY ("id"),
         CONSTRAINT "FK_cotizacion_linea_cotizacion" FOREIGN KEY ("cotizacion_id") REFERENCES "cotizacion" ("id") ON DELETE CASCADE,
         CONSTRAINT "FK_cotizacion_linea_servicio" FOREIGN KEY ("servicio_id") REFERENCES "servicio" ("id"),

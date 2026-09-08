@@ -16,12 +16,6 @@ export class CotizacionLinea {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => Cotizacion, (cotizacion) => cotizacion.lineas, {
     onDelete: 'CASCADE',
   })
@@ -50,4 +44,10 @@ export class CotizacionLinea {
 
   @Column({ type: 'decimal', precision: 12, scale: 2, nullable: true })
   descuento: string | null;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

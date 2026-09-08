@@ -7,8 +7,6 @@ export class AddFactura1783108899928 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "factura" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "cliente_id" uuid NOT NULL,
         "vehiculo_id" uuid,
         "cotizacion_id" uuid,
@@ -22,6 +20,8 @@ export class AddFactura1783108899928 implements MigrationInterface {
         "monto_pagado" decimal(12,2) NOT NULL DEFAULT 0,
         "descuento_global" decimal(12,2),
         "notas" text,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_factura" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_factura_numero" UNIQUE ("numero"),
         CONSTRAINT "FK_factura_cliente" FOREIGN KEY ("cliente_id") REFERENCES "cliente" ("id"),
@@ -34,8 +34,6 @@ export class AddFactura1783108899928 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "factura_linea" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "factura_id" uuid NOT NULL,
         "servicio_id" uuid NOT NULL,
         "pieza_id" uuid,
@@ -44,6 +42,8 @@ export class AddFactura1783108899928 implements MigrationInterface {
         "precio_unitario" decimal(12,2) NOT NULL,
         "itbis" decimal(12,2) NOT NULL,
         "descuento" decimal(12,2),
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_factura_linea" PRIMARY KEY ("id"),
         CONSTRAINT "FK_factura_linea_factura" FOREIGN KEY ("factura_id") REFERENCES "factura" ("id") ON DELETE CASCADE,
         CONSTRAINT "FK_factura_linea_servicio" FOREIGN KEY ("servicio_id") REFERENCES "servicio" ("id"),

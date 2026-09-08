@@ -15,12 +15,6 @@ export class Vehiculo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => Cliente, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'cliente_id' })
   cliente: Cliente;
@@ -46,4 +40,10 @@ export class Vehiculo {
 
   @Column({ type: 'varchar', name: 'vin_chasis', nullable: true })
   vinChasis: string | null;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

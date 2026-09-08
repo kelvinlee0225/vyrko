@@ -9,9 +9,9 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "rol" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_rol" PRIMARY KEY ("id")
       )
     `);
@@ -19,8 +19,6 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "cliente" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre_razon_social" varchar NOT NULL,
         "tipo_cliente" varchar NOT NULL,
         "cedula_rnc" varchar,
@@ -29,6 +27,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
         "direccion" varchar,
         "limite_credito" decimal(12,2),
         "dias_credito" int,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_cliente" PRIMARY KEY ("id")
       )
     `);
@@ -36,10 +36,10 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "tecnico" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         "activo" boolean NOT NULL,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_tecnico" PRIMARY KEY ("id")
       )
     `);
@@ -47,13 +47,13 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "usuario" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "rol_id" uuid NOT NULL,
         "nombre" varchar NOT NULL,
         "username" varchar NOT NULL,
         "password_hash" varchar NOT NULL,
         "activo" boolean NOT NULL DEFAULT true,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_usuario" PRIMARY KEY ("id"),
         CONSTRAINT "UQ_usuario_username" UNIQUE ("username"),
         CONSTRAINT "FK_usuario_rol" FOREIGN KEY ("rol_id") REFERENCES "rol" ("id")
@@ -63,8 +63,6 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "vehiculo" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "cliente_id" uuid NOT NULL,
         "placa" varchar NOT NULL,
         "marca" varchar NOT NULL,
@@ -72,6 +70,8 @@ export class InitSchema1782869686899 implements MigrationInterface {
         "anio" int NOT NULL,
         "color" varchar NOT NULL,
         "vin_chasis" varchar,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_vehiculo" PRIMARY KEY ("id"),
         CONSTRAINT "FK_vehiculo_cliente" FOREIGN KEY ("cliente_id") REFERENCES "cliente" ("id") ON DELETE CASCADE
       )
@@ -80,13 +80,13 @@ export class InitSchema1782869686899 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "empresa" (
         "id" uuid NOT NULL DEFAULT gen_random_uuid(),
-        "created_at" timestamp NOT NULL DEFAULT now(),
-        "updated_at" timestamp NOT NULL DEFAULT now(),
         "nombre" varchar NOT NULL,
         "rnc" varchar NOT NULL,
         "direccion" varchar NOT NULL,
         "telefono" varchar NOT NULL,
         "correo" varchar NOT NULL,
+        "created_at" timestamptz NOT NULL DEFAULT now(),
+        "updated_at" timestamptz NOT NULL DEFAULT now(),
         CONSTRAINT "PK_empresa" PRIMARY KEY ("id")
       )
     `);

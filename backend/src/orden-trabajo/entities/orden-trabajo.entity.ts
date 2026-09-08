@@ -20,12 +20,6 @@ export class OrdenTrabajo {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @ManyToOne(() => Cotizacion, { nullable: true })
   @JoinColumn({ name: 'cotizacion_id' })
   cotizacion: Cotizacion | null;
@@ -65,4 +59,10 @@ export class OrdenTrabajo {
     (asignacion) => asignacion.ordenTrabajo,
   )
   asignaciones: OrdenTrabajoAsignacion[];
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }

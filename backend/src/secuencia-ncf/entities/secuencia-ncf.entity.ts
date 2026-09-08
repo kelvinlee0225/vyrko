@@ -11,12 +11,6 @@ export class SecuenciaNcf {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @CreateDateColumn({ type: 'timestamp', name: 'created_at' })
-  createdAt: Date;
-
-  @UpdateDateColumn({ type: 'timestamp', name: 'updated_at' })
-  updatedAt: Date;
-
   @Column({ type: 'int', name: 'tipo_ecf' })
   tipoECF: number;
 
@@ -36,4 +30,10 @@ export class SecuenciaNcf {
 
   @Column({ type: 'boolean', default: true })
   activa: boolean;
+
+  @CreateDateColumn({ type: 'timestamptz', name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamptz', name: 'updated_at' })
+  updatedAt: Date;
 }
