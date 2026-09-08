@@ -12,6 +12,9 @@ Thumbs.db
 *.swp
 *.swo
 
+# Claude Code personal tooling (local settings, installed plugins/skills)
+.claude/
+
 # Env files at the repo root (backend/ and frontend/ already ignore their own)
 .env
 .env.local
