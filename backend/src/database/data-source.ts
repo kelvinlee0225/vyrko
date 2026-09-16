@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 import { config } from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import fs from 'fs';
 
 config();
 
@@ -14,6 +15,15 @@ export const dataSourceOptions: DataSourceOptions = {
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   synchronize: false,
+  ssl:
+    process.env.DB_SSL === 'true'
+      ? {
+          rejectUnauthorized: false,
+          ca: process.env.DB_SSL_CA_PATH
+            ? fs.readFileSync(process.env.DB_SSL_CA_PATH)
+            : undefined,
+        }
+      : false,
 };
 
 export default new DataSource(dataSourceOptions);
