@@ -23,6 +23,7 @@ ENV NODE_ENV=production
 RUN addgroup -S nodejs && adduser -S nestjs -G nodejs
 
 COPY --from=deps /app/node_modules ./node_modules
+ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem ./certs/rds-ca-bundle.pem
 COPY --from=build /app/dist ./dist
 COPY package.json ./
 
