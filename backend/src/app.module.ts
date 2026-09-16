@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { buildSslOption } from './database/ssl.config';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
@@ -43,6 +44,7 @@ import { PasswordChangeGuard } from './auth/guards/password-change.guard';
         database: config.get<string>('DB_NAME'),
         autoLoadEntities: true,
         synchronize: false,
+        ssl: buildSslOption(),
       }),
     }),
     RolModule,
